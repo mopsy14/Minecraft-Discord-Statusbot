@@ -1,3 +1,8 @@
+Download at: 
+https://modrinth.com/plugin/discord-statusbot
+or:
+https://github.com/mopsy14/Minecraft-Discord-Statusbot/releases
+
 # Statusbot
 A Discord bot, that will come online when your Minecraft server is online.
 
