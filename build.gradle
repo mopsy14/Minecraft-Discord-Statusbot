@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'mopsy.productions'
-version = '10.0'
+version = '13.0'
 
 repositories {
     mavenCentral()
