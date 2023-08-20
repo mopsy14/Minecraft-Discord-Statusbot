@@ -1,0 +1,3 @@
+name: Statusbot
+version: '${version}'
+main: mopsy.productions.discord.statusbot.StatusbotMain
