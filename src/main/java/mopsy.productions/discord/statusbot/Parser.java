@@ -2,7 +2,7 @@ package mopsy.productions.discord.statusbot;
 
 import java.util.List;
 
-import static discord.statusbot.ConfigManager.configuration;
+import static mopsy.productions.discord.statusbot.ConfigManager.configuration;
 
 public class Parser {
 

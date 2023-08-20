@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 
-import static discord.statusbot.ConfigManager.configuration;
+import static mopsy.productions.discord.statusbot.ConfigManager.configuration;
 
 public class BotManger {
     public static JDA jda;
