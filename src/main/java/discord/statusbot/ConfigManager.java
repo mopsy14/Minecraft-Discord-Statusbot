@@ -23,7 +23,7 @@ public class ConfigManager {
 
             initialized = true;
         }catch (IOException ioException){
-            System.out.println("§4 Statusbot: Something went wrong while creating the config file!");
+            System.out.println("Statusbot: Something went wrong while creating the config file!");
             ioException.printStackTrace();
         }
     }
@@ -31,7 +31,7 @@ public class ConfigManager {
         configuration.addDefault("bot_token","enter token here");
         configuration.addDefault("status_mode","playing");
         configuration.addDefault("player_separator_text",", ");
-        configuration.addDefault("status_message","$AOP$ Players online: $PL$");
+        configuration.addDefault("status_message","$AOP$ player(s) online: $PL$");
         configuration.addDefault("no_player_message","No one is online");
         statusbotMain.addConfigDefaults(configuration);
     }

@@ -53,7 +53,7 @@ public class Parser {
             case"PL":
                 return String.join(Csepstr, players);
             default:
-                System.out.println("§4 Statusbot: Unknown variable: " + varName);
+                System.out.println("Statusbot: Unknown variable: " + varName);
                 return "";
         }
     }

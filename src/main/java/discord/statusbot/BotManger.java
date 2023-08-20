@@ -9,6 +9,12 @@ import static discord.statusbot.ConfigManager.configuration;
 public class BotManger {
     public static JDA jda;
     public static void regBot(String botToken, String status) {
+        if(botToken==null || botToken.equals("enter token here") || botToken.equals("")){
+            System.out.println("Statusbot: Invalid Bot Token!");
+            System.out.println("Statusbot: Get the token of your discord bot from here: https://discord.com/developers/applications");
+            System.out.println("Statusbot: After that put the token in the statusbot_config.yml file.");
+            return;
+        }
         if(jda == null){
             JDABuilder builder;
             builder = JDABuilder.createDefault(botToken);
@@ -31,8 +37,8 @@ public class BotManger {
                         break;
                     default:
                         builder.setActivity(Activity.of(Activity.ActivityType.PLAYING, status));
-                        System.out.println("§4 Statusbot: invalid discord bot status mode: " + configuration.getString("status_mode"));
-                        System.out.println("§4 Statusbot: valid statuses are: playing, competing, listening, watching (Streaming is currently disabled)");
+                        System.out.println("Statusbot: invalid discord bot status mode: " + configuration.getString("status_mode"));
+                        System.out.println("Statusbot: valid statuses are: playing, competing, listening, watching (Streaming is currently disabled)");
                         break;
                 }
             }else{
@@ -58,8 +64,8 @@ public class BotManger {
                     break;
                 default:
                     jda.getPresence().setActivity(Activity.of(Activity.ActivityType.PLAYING, status));
-                    System.out.println("§4 Statusbot: invalid discord bot status mode: " + configuration.getString("status_mode"));
-                    System.out.println("§4 Statusbot: valid statuses are: playing, competing, listening, watching (Streaming is currently disabled)");
+                    System.out.println("Statusbot: invalid discord bot status mode: " + configuration.getString("status_mode"));
+                    System.out.println("Statusbot: valid statuses are: playing, competing, listening, watching (Streaming is currently disabled)");
                     break;
             }
         }
