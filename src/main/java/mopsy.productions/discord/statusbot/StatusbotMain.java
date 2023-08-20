@@ -1,4 +1,4 @@
-package discord.statusbot;
+package mopsy.productions.discord.statusbot;
 
 import org.simpleyaml.configuration.file.YamlConfiguration;
 
