@@ -1,14 +1,14 @@
-package src.main.java.discord.statusbot;
+package discord.statusbot;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.simpleyaml.configuration.file.YamlConfiguration;
 
 public class StatusbotMain {
+    public void init(){initAll();}
     private void initAll(){
         ConfigManager.init(this);
     }
-    Map<String,Object> getConfigDefaults(){
-        return new HashMap<>();
+    void addConfigDefaults(YamlConfiguration configuration){
+
     }
     String getConfigPath(){
         return "";

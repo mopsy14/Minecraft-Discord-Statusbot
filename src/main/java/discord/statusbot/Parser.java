@@ -1,8 +1,8 @@
-package src.main.java.discord.statusbot;
+package discord.statusbot;
 
 import java.util.List;
 
-import static src.main.java.discord.statusbot.ConfigManager.configuration;
+import static discord.statusbot.ConfigManager.configuration;
 
 public class Parser {
 

@@ -1,10 +1,10 @@
-package src.main.java.discord.statusbot;
+package discord.statusbot;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 
-import static src.main.java.discord.statusbot.ConfigManager.configuration;
+import static discord.statusbot.ConfigManager.configuration;
 
 public class BotManger {
     public static JDA jda;

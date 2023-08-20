@@ -1,10 +1,10 @@
-package src.main.java.discord.statusbot;
+package discord.statusbot;
 
 import org.simpleyaml.configuration.file.YamlFile;
+import org.simpleyaml.configuration.implementation.api.QuoteStyle;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 public class ConfigManager {
     public static boolean initialized = false;
@@ -15,8 +15,11 @@ public class ConfigManager {
         configFile = new File(statusbotMain.getConfigPath() + File.separator +"statusbot_config.yml");
         try {
             configuration = new YamlFile(configFile);
+            ConfigManager.configuration.options().quoteStyleDefaults().setDefaultQuoteStyle(QuoteStyle.SINGLE);
             configuration.createOrLoadWithComments();
+
             createDefaults(statusbotMain);
+            configuration.save();
 
             initialized = true;
         }catch (IOException ioException){
@@ -25,14 +28,12 @@ public class ConfigManager {
         }
     }
     private static void createDefaults(StatusbotMain statusbotMain){
-        configuration.addDefaults(Map.of(
-                "bot_token","enter token here",
-                "status_mode","playing",
-                "player_separator_text",", ",
-                "status_message","$AOP$ Players online: $PL$",
-                "no_player_message","No one is online"
-        ));
-        configuration.addDefaults(statusbotMain.getConfigDefaults());
+        configuration.addDefault("bot_token","enter token here");
+        configuration.addDefault("status_mode","playing");
+        configuration.addDefault("player_separator_text",", ");
+        configuration.addDefault("status_message","$AOP$ Players online: $PL$");
+        configuration.addDefault("no_player_message","No one is online");
+        statusbotMain.addConfigDefaults(configuration);
     }
 
 
