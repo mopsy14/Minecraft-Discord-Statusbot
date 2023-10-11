@@ -148,16 +148,9 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
-    minecraftLibrary 'com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.3'
-    minecraftLibrary("net.dv8tion:JDA:5.0.0-beta.13") {
+    implementation 'com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.3'
+    implementation("net.dv8tion:JDA:5.0.0-beta.13") {
         exclude module: 'opus-java'
-    }
-
-    jarJar(group: 'com.github.Carleslc.Simple-YAML', name: 'Simple-Yaml', version: '[1.8.3,1.8.4)'){
-        //jarJar.pin(it, '1.8.3')
-    }
-    jarJar(group: 'net.dv8tion', name: 'JDA', version: '[5.0.0-beta.13,5.0.1)'){
-        //jarJar.pin(it, '5.0.0-beta.13')
     }
 }
 
@@ -165,14 +158,17 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "examplemod",
-            "Specification-Vendor": "examplemodsareus",
+            "Specification-Title": "statusbot",
+            "Specification-Vendor": "mopsy",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"examplemodsareus",
+            "Implementation-Vendor" :"mopsy",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
+    }
+    from{
+        configurations.runtimeClasspath.findAll { it.name == 'JDA-5.0.0-beta.14.jar' || it.name == 'Simple-Yaml-1.8.3.jar'}.collect { zipTree(it) }
     }
 }
 
