@@ -23,6 +23,7 @@ public class StatusbotMain {
 
     }
     String getConfigPath(){
+        //return System.getProperty("user.dir") + File.separator + "config";
         if(server != null && server.isDedicatedServer()){
             return server.getServerDirectory().getAbsolutePath() + File.separator + "config";
         }
@@ -43,13 +44,14 @@ public class StatusbotMain {
 
         BotManger.regBot(
                 ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(Arrays.asList(event.getServer().getPlayerNames()))
+                Parser.createStatusMessage(Arrays.asList(server.getPlayerNames()))
         );
     }
 
     @SubscribeEvent
     public void stop(final FMLServerStoppingEvent event){
-        BotManger.jda.shutdownNow();
+        if(BotManger.jda != null)
+            BotManger.jda.shutdownNow();
     }
 
     @SubscribeEvent

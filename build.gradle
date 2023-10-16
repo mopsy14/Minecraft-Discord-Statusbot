@@ -1,16 +1,24 @@
 buildscript {
     repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
+        maven {
+            url = 'https://maven.minecraftforge.net'
+        }
+        maven{
+            url = uri("https://plugins.gradle.org/m2/")
+        }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath("gradle.plugin.com.github.johnrengelman:shadow:7.1.2")
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+
+apply plugin : "com.github.johnrengelman.shadow"
 
 version = '13.0'
 group = 'mopsy.productions.discord.statusbot' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -28,7 +36,7 @@ repositories {
     // for more information about repositories.
 }
 
-jarJar.enable()
+//jarJar.enable()
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
     // The mappings can be changed at any time, and must be in the following format.
@@ -156,6 +164,7 @@ dependencies {
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
+    DuplicatesStrategy.EXCLUDE
     manifest {
         attributes([
             "Specification-Title": "statusbot",
@@ -166,9 +175,6 @@ jar {
             "Implementation-Vendor" :"mopsy",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
-    }
-    from{
-        configurations.runtimeClasspath.findAll { it.name == 'JDA-5.0.0-beta.14.jar' || it.name == 'Simple-Yaml-1.8.3.jar'}.collect { zipTree(it) }
     }
 }
 
@@ -190,6 +196,33 @@ publishing {
         }
     }
 }
-
-tasks.named('jarJar') {
+shadowJar {
+    //configurations = [project.configurations.compileClasspath]
+    //minimize(){
+    //    exclude("")
+    //}
+    relocate('gnu.trove', 'statusbot.gnu.trove')
+    relocate('org.apache.commons.collections4', 'statusbot.org.apache.commons.collections4')
+    relocate('org.slf4j', 'statusbot.org.slf4j')
+    dependencies {
+        include(dependency("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.3"))
+        include(dependency("net.dv8tion:JDA:5.0.0-beta.13"))
+        include(dependency("net.sf.trove4j:trove4j:3.0.3"))
+        include(dependency("com.squareup.okhttp3:okhttp:4.10.0"))
+        include(dependency("org.apache.commons:commons-collections4:4.4"))
+        include(dependency("com.squareup.okio:okio-jvm:3.0.0"))
+        include(dependency("com.neovisionaries:nv-websocket-client:2.14"))
+        include(dependency("com.fasterxml.jackson.core:jackson-databind:2.14.1"))
+        include(dependency("com.fasterxml.jackson.core:jackson-core:2.14.1"))
+        include(dependency("com.fasterxml.jackson.core:jackson-annotations:2.14.1"))
+        include(dependency("org.slf4j:slf4j-api:1.8.0-beta4"))
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib:1.6.20"))
+    }
+    classifier ''
+    //include("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.3")
+    //include("net.dv8tion:JDA:5.0.0-beta.13")
+}
+shadowJar.finalizedBy('reobfShadowJar')
+reobf {
+    shadowJar{}
 }
