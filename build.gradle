@@ -197,10 +197,6 @@ publishing {
     }
 }
 shadowJar {
-    //configurations = [project.configurations.compileClasspath]
-    //minimize(){
-    //    exclude("")
-    //}
     relocate('gnu.trove', 'statusbot.gnu.trove')
     relocate('org.apache.commons.collections4', 'statusbot.org.apache.commons.collections4')
     relocate('org.slf4j', 'statusbot.org.slf4j')
@@ -219,8 +215,6 @@ shadowJar {
         include(dependency("org.jetbrains.kotlin:kotlin-stdlib:1.6.20"))
     }
     classifier ''
-    //include("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.3")
-    //include("net.dv8tion:JDA:5.0.0-beta.13")
 }
 shadowJar.finalizedBy('reobfShadowJar')
 reobf {

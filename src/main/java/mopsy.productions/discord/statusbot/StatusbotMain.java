@@ -11,7 +11,9 @@ import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Mod("discord_statusbot")
 public class StatusbotMain {
@@ -23,7 +25,6 @@ public class StatusbotMain {
 
     }
     String getConfigPath(){
-        //return System.getProperty("user.dir") + File.separator + "config";
         if(server != null && server.isDedicatedServer()){
             return server.getServerDirectory().getAbsolutePath() + File.separator + "config";
         }
@@ -66,8 +67,18 @@ public class StatusbotMain {
     public void left(final PlayerLoggedOutEvent event) {
         BotManger.regBot(
                 ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(Arrays.asList(server.getPlayerNames()))
+                Parser.createStatusMessage(makeStringList(server.getPlayerNames(), event.getPlayer().getName().getString()))
         );
+    }
+
+    private List<String> makeStringList(String[] players, String excluded){
+        List<String> res = new ArrayList<>(players.length-1);
+        for(String player : players){
+            if(!player.equals(excluded)){
+                res.add(player);
+            }
+        }
+        return res;
     }
 
 }
