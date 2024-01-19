@@ -170,9 +170,31 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 shadowJar {
+    mergeServiceFiles()
+    //Simple-YAML
+    relocate('org.simpleyaml','statusbot.org.simpleyaml')
+    //JDA
+    relocate('com.iwebpp.crypto', 'statusbot.com.iwebpp.crypto')
+    relocate('net.dv8tion', 'statusbot.net.dv8tion')
+    //Trove4j
     relocate('gnu.trove', 'statusbot.gnu.trove')
+    //Okhttp
+    relocate('okhttp3', 'statusbot.okhttp3')
+    //Commons Collections
     relocate('org.apache.commons.collections4', 'statusbot.org.apache.commons.collections4')
+    //okio-jvm
+    relocate('okio','statusbot.okio')
+    //nv-websocket-client
+    relocate('com.neovisionaries','statusbot.com.neovisionaries')
+    //jackson-...
+    relocate('com.fasterxml.jackson.core','statusbot.com.fasterxml.jackson.core')
+    relocate('com.fasterxml.jackson.databind','statusbot.com.fasterxml.jackson.databind')
+    relocate('com.fasterxml.jackson.annotation','statusbot.com.fasterxml.jackson.annotation')
+    //slf4j
     relocate('org.slf4j', 'statusbot.org.slf4j')
+    //kotlin-stdlib
+    relocate('kotlin', 'statusbot.kotlin')
+
     dependencies {
         include(dependency("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.3"))
         include(dependency("net.dv8tion:JDA:5.0.0-beta.13"))
