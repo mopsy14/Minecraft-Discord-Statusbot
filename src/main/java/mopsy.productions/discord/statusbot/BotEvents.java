@@ -20,15 +20,15 @@ public class BotEvents extends ListenerAdapter {
         String message = event.getMessage().getContentStripped().toLowerCase();
         switch (message) {
             case "!regchannelformessages" -> {
-                if (event.getChannelType() == ChannelType.PRIVATE) {
-                    if(BotManager.messagePrivateChannels.contains(event.getChannel().getIdLong())){
+                if (event.getChannelType() == ChannelType.PRIVATE && ConfigManager.getBool("enable_direct_message_status_messages")) {
+                    if(BotManager.messagePrivateChannels.contains(new UserChannelPair(event.getAuthor().getIdLong(), event.getChannel().getIdLong()))){
                         event.getMessage().reply("Channel was already registered, nothing changed").queue();
                     }else{
-                        BotManager.messagePrivateChannels.add(event.getChannel().getIdLong());
+                        BotManager.messagePrivateChannels.add(new UserChannelPair(event.getAuthor().getIdLong(), event.getChannel().getIdLong()));
                         event.getMessage().reply("Channel registered").queue();
                     }
                 }
-                if (event.getChannelType() == ChannelType.TEXT) {
+                if (event.getChannelType() == ChannelType.TEXT && ConfigManager.getBool("enable_text_channel_status_messages")) {
                     if (PermissionUtil.checkPermission(event.getGuildChannel().getPermissionContainer(), event.getMember(), Permission.MANAGE_CHANNEL)) {
                         if(BotManager.messageTextChannels.contains(event.getChannel().getIdLong())){
                             event.getMessage().reply("Channel was already registered, nothing changed").queue();
@@ -42,14 +42,14 @@ public class BotEvents extends ListenerAdapter {
                 }
             }
             case "!endregchannelformessages" -> {
-                if (event.getChannelType() == ChannelType.PRIVATE) {
-                    if(BotManager.messagePrivateChannels.remove(event.getChannel().getIdLong())){
+                if (event.getChannelType() == ChannelType.PRIVATE && ConfigManager.getBool("enable_direct_message_status_messages")) {
+                    if(BotManager.messagePrivateChannels.remove(new UserChannelPair(event.getAuthor().getIdLong(), event.getChannel().getIdLong()))){
                         event.getMessage().reply("The bot will stop sending messages to this channel").queue();
                     }else{
                         event.getMessage().reply("This channel isn't registered yet, so you can't de-register it").queue();
                     }
                 }
-                if (event.getChannelType() == ChannelType.TEXT) {
+                if (event.getChannelType() == ChannelType.TEXT && ConfigManager.getBool("enable_text_channel_status_messages")) {
                     if (PermissionUtil.checkPermission(event.getGuildChannel().getPermissionContainer(), event.getMember(), Permission.MANAGE_CHANNEL)) {
                         if(BotManager.messageTextChannels.remove(event.getChannel().getIdLong())){
                             event.getMessage().reply("The bot will stop sending messages to this channel").queue();
@@ -62,10 +62,11 @@ public class BotEvents extends ListenerAdapter {
                 }
             }
             case "!help" -> {
-                event.getMessage().reply("Possible commands are: !regChannelForMessages and !endRegChannelForMessages").queue();
+                event.getMessage().reply("Possible commands are:\n!help\n!regChannelForMessages\n!endRegChannelForMessages").queue();
             }
             case "!shutdown" -> {
-                event.getJDA().shutdownNow();
+                event.getMessage().reply("Shutting bot down").queue();
+                StatusbotMain.shouldStopBot = true;
             }
         }
     }

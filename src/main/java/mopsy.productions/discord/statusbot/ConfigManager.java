@@ -33,7 +33,15 @@ public class ConfigManager {
         configuration.addDefault("player_separator_text",", ");
         configuration.addDefault("status_message","$AOP$ player(s) online: $PL$");
         configuration.addDefault("no_player_message","No one is online");
+        configuration.addDefault("enable_direct_message_status_messages","true");
+        configuration.addDefault("enable_text_channel_status_messages","true");
         statusbotMain.addConfigDefaults(configuration);
+    }
+    public static String getStr(String key){
+        return configuration.getString(key);
+    }
+    public static boolean getBool(String key){
+        return configuration.getString(key).equalsIgnoreCase("true");
     }
 
 
