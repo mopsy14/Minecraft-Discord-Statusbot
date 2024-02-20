@@ -12,7 +12,7 @@ public class Parser {
             String Csepstr = configuration.getString("player_separator_text");
             String Cnpm = configuration.getString("no_player_message");
 
-            return shorten(players.size() == 0 ? Cnpm : readCme(Cme, Csepstr, players));
+            return shorten(players.isEmpty() ? Cnpm : readCme(Cme, Csepstr, players));
         }else
             return "";
     }
