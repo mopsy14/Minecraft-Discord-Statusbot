@@ -71,11 +71,6 @@ public class BotEvents extends ListenerAdapter {
                 event.getMessage().reply("Possible commands are:\n!help\n!regChannelForMessages\n!endRegChannelForMessages").queue();
                 break;
             }
-            case "!shutdown": {
-                event.getMessage().reply("Shutting bot down").queue();
-                StatusbotMain.shouldStopBot = true;
-                break;
-            }
         }
     }
 }

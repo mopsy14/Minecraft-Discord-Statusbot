@@ -8,20 +8,20 @@ import static mopsy.productions.discord.statusbot.ConfigManager.configuration;
 public class Parser {
 
     //Status message
-    static String createStatusMessage(List<String> players){
+    static String createStatusMessage(Supplier<List<String>> playersSupplier, int playerAmount){
         if(ConfigManager.initialized) {
             String Cme = configuration.getString("status_message");
             String Csepstr = configuration.getString("player_separator_text");
             String Cnpm = configuration.getString("no_player_message");
 
-            return shorten(players.isEmpty() ? Cnpm : readCme(Cme, Csepstr, players));
+            return shorten(playerAmount==0 ? Cnpm : readCme(Cme, Csepstr, playersSupplier, playerAmount));
         }else
             return "";
     }
     private static String shorten(String str){
         return str.length()>128?str.substring(0,124).concat("..."):str;
     }
-    private static String readCme(String Cme, String Csepstr, List<String> players){
+    private static String readCme(String Cme, String Csepstr, Supplier<List<String>> players, int playerAmount){
         String res= "";
         char[] CmeChars = Cme.toCharArray();
         char[] partVarName = null;
@@ -34,7 +34,7 @@ public class Parser {
                     partVarName = new char[Cme.length()-2];
                     partVarNameLength = 0;
                 }else{
-                    res = res.concat(getFromVarName(String.valueOf(partVarName).substring(0,partVarNameLength), Csepstr, players));
+                    res = res.concat(getFromVarName(String.valueOf(partVarName).substring(0,partVarNameLength), Csepstr, players, playerAmount));
                 }
             }else{
                 if(readingVarName){
@@ -47,12 +47,12 @@ public class Parser {
         }
         return res;
     }
-    private static String getFromVarName(String varName, String Csepstr, List<String> players){
+    private static String getFromVarName(String varName, String Csepstr, Supplier<List<String>> playersSupplier, int playerAmount){
         switch (varName){
             case"AOP":
-                return String.valueOf(players.size());
+                return String.valueOf(playerAmount);
             case"PL":
-                return String.join(Csepstr, players);
+                return String.join(Csepstr, playersSupplier.get());
             default:
                 System.out.println("Statusbot: Unknown variable: " + varName);
                 return "";
