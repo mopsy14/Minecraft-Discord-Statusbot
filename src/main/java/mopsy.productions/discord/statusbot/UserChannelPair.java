@@ -11,7 +11,8 @@ public class UserChannelPair {
     @Override
     public boolean equals(Object obj) {
         if(super.equals(obj)) return true;
-        if(obj instanceof UserChannelPair ucp){
+        if(obj instanceof UserChannelPair){
+            UserChannelPair ucp = (UserChannelPair)obj;
             return user == ucp.user && channel == ucp.channel;
         }
         return false;
