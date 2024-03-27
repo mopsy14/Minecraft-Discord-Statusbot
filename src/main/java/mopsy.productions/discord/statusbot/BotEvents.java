@@ -3,6 +3,7 @@ package mopsy.productions.discord.statusbot;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
@@ -72,5 +73,10 @@ public class BotEvents extends ListenerAdapter {
                 break;
             }
         }
+    }
+
+    @Override
+    public void onReady(ReadyEvent event) {
+
     }
 }

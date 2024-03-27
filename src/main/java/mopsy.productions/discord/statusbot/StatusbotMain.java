@@ -14,4 +14,7 @@ public class StatusbotMain {
     String getConfigPath(){
         return "";
     }
+    public void onBotReady(){
+
+    }
 }
