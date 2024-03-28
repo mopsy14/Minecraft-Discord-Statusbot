@@ -9,7 +9,9 @@ import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class BotEvents extends ListenerAdapter {
-    public static boolean regEvents(){
+    public static StatusbotMain main;
+    public static boolean regEvents(StatusbotMain main){
+        BotEvents.main = main;
         if(BotManager.jda == null) return false;
 
         BotManager.jda.addEventListener(new BotEvents());
@@ -77,6 +79,6 @@ public class BotEvents extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent event) {
-
+        main.onBotReady();
     }
 }
