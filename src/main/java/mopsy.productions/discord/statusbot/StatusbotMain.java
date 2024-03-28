@@ -15,6 +15,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
     public void init(){initAll();}
     private void initAll(){
         ConfigManager.init(this);
+        DataManager.getAllData(this);
     }
     void addConfigDefaults(YamlConfiguration configuration){
 
@@ -74,5 +75,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
             BotManger.jda.shutdownNow();
         }
     }
+    public void onBotReady(){
 
+    }
 }

@@ -3,21 +3,29 @@ package mopsy.productions.discord.statusbot;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+
+import static mopsy.productions.discord.statusbot.ConfigManager.configuration;
+import java.util.ArrayList;
+import java.util.List;
 
 import static mopsy.productions.discord.statusbot.ConfigManager.configuration;
 
-public class BotManger {
+public class BotManager {
     public static JDA jda;
+    public static List<Long> messageTextChannels = new ArrayList<>();
+    public static List<UserChannelPair> messagePrivateChannels = new ArrayList<>();
     public static void regBot(String botToken, String status) {
         if(botToken==null || botToken.equals("enter token here") || botToken.equals("")){
             System.out.println("Statusbot: Invalid Bot Token!");
             System.out.println("Statusbot: Get the token of your discord bot from here: https://discord.com/developers/applications");
-            System.out.println("Statusbot: After that put the token in the statusbot_config.yml file.");
+            System.out.println("Statusbot: After that put the token in the config file at: "+ConfigManager.configFile.getAbsoluteFile());
             return;
         }
         if(jda == null){
             JDABuilder builder;
-            builder = JDABuilder.createDefault(botToken);
+            builder = JDABuilder.createDefault(botToken, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS).setMemberCachePolicy(MemberCachePolicy.ALL);
             if (!(status == null || status.equals(""))) {
                 switch (configuration.getString("status_mode").toLowerCase()) {
                     case "playing":
@@ -45,6 +53,15 @@ public class BotManger {
                 builder.setActivity(null);
             }
             jda = builder.build();
+
+            try {
+                jda.awaitReady();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            for(UserChannelPair id : messagePrivateChannels)
+                BotManager.jda.openPrivateChannelById(id.user).queue();
         }else{
             switch (configuration.getString("status_mode").toLowerCase()) {
                 case "playing":
