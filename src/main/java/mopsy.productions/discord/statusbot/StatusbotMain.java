@@ -34,18 +34,17 @@ public class StatusbotMain extends JavaPlugin implements Listener {
 
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray()),getServer().getOnlinePlayers().size())
+                Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray()),getServer().getOnlinePlayers().size()),
+                this
         );
-        if(BotManager.jda!=null){
-            BotEvents.regEvents(this);
-        }
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray()),getServer().getOnlinePlayers().size())
+                Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray()),getServer().getOnlinePlayers().size()),
+                this
         );
         if(BotManager.jda!=null) {
             if (ConfigManager.getBool("enable_server_join_messages")) {
@@ -76,7 +75,8 @@ public class StatusbotMain extends JavaPlugin implements Listener {
     public void onPlayerLeave(PlayerQuitEvent e){
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray(),e.getPlayer().getName()),getServer().getOnlinePlayers().size()-1)
+                Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray(),e.getPlayer().getName()),getServer().getOnlinePlayers().size()-1),
+                this
         );
         if(BotManager.jda!=null) {
             if (ConfigManager.getBool("enable_server_leave_messages")) {
