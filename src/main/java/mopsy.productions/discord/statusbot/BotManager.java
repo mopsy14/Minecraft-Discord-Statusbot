@@ -51,7 +51,7 @@ public class BotManager {
             }else{
                 builder.setActivity(null);
             }
-            jda.addEventListener(new BotEvents(main));
+            builder.addEventListeners(new BotEvents(main));
             jda = builder.build();
 
             try {
