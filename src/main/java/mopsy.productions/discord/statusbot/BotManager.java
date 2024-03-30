@@ -15,7 +15,7 @@ public class BotManager {
     public static JDA jda;
     public static List<Long> messageTextChannels = new ArrayList<>();
     public static List<UserChannelPair> messagePrivateChannels = new ArrayList<>();
-    public static void regBot(String botToken, String status) {
+    public static void regBot(String botToken, String status, StatusbotMain main) {
         if(botToken==null || botToken.equals("enter token here") || botToken.equals("")){
             System.out.println("Statusbot: Invalid Bot Token!");
             System.out.println("Statusbot: Get the token of your discord bot from here: https://discord.com/developers/applications");
@@ -51,6 +51,7 @@ public class BotManager {
             }else{
                 builder.setActivity(null);
             }
+            jda.addEventListener(new BotEvents(main));
             jda = builder.build();
 
             try {
