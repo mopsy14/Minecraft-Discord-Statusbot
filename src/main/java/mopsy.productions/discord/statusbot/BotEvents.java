@@ -10,12 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class BotEvents extends ListenerAdapter {
     public static StatusbotMain main;
-    public static boolean regEvents(StatusbotMain main){
+    public BotEvents(StatusbotMain main){
         BotEvents.main = main;
-        if(BotManager.jda == null) return false;
-
-        BotManager.jda.addEventListener(new BotEvents());
-        return true;
     }
 
     @Override
