@@ -147,9 +147,14 @@ public class StatusbotMain extends JavaPlugin implements Listener {
             }
         }
         DataManager.saveAllData(this);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         if(BotManager.jda!=null){
-            BotManager.jda.shutdownNow();
-            /*
+            BotManager.jda.shutdown();
+
             try {
                 if(!BotManager.jda.awaitShutdown(Duration.ofSeconds(10))){
                     BotManager.jda.shutdownNow();
@@ -157,7 +162,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            */
+
         }
     }
     public void onBotReady(){
