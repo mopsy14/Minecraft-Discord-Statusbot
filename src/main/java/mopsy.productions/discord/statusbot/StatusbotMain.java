@@ -15,6 +15,7 @@ import java.util.List;
 public class StatusbotMain extends Plugin implements Listener {
     private void initAll(){
         ConfigManager.init(this);
+        DataManager.getAllData(this);
     }
     void addConfigDefaults(YamlConfiguration configuration){
 
@@ -51,7 +52,9 @@ public class StatusbotMain extends Plugin implements Listener {
                 Parser.createStatusMessage(MakeStringList(getProxy().getPlayers()))
         );
     }
+    public void onBotReady(){
 
+    }
     @EventHandler
     public void onJoin(ServerConnectedEvent e){
         BotManger.regBot(

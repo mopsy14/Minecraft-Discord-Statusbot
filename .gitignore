@@ -2,3 +2,8 @@
 /.idea/
 /.gradle/
 /build/
+/logs/
+/run/
+/run-data/
+/configs/
+/out/
