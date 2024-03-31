@@ -42,6 +42,7 @@ public class StatusbotMain {
     }
     private void initAll(){
         ConfigManager.init(this);
+        DataManager.getAllData(this);
     }
     void addConfigDefaults(YamlConfiguration configuration){
 
@@ -59,6 +60,7 @@ public class StatusbotMain {
                 Parser.createStatusMessage(MakeStringList(server.getAllPlayers()))
         );
     }
+    public void onBotReady(){
 
     private List<String> MakeStringList(Collection<Player> players){
         List<String> res = new ArrayList<>(players.size());
@@ -88,5 +90,6 @@ public class StatusbotMain {
         if(BotManger.jda!=null){
             BotManger.jda.shutdownNow();
         }
+    }
     }
 }
