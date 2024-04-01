@@ -15,6 +15,7 @@ public class StatusbotMain implements ModInitializer {
 
     private void initAll(){
         ConfigManager.init(this);
+        DataManager.getAllData(this);
     }
     void addConfigDefaults(YamlConfiguration configuration){
 
@@ -22,6 +23,7 @@ public class StatusbotMain implements ModInitializer {
     String getConfigPath(){
         return System.getProperty("user.dir") + File.separator + "config";
     }
+    public void onBotReady(){
 
 
     @Override
@@ -49,5 +51,6 @@ public class StatusbotMain implements ModInitializer {
                 );
             }
         });
+    }
     }
 }
