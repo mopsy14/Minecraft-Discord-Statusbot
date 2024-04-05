@@ -166,7 +166,6 @@ public class StatusbotMain extends JavaPlugin implements Listener {
         }
     }
     public void onBotReady(){
-        System.out.println("onBotReady");
         if(BotManager.jda!=null) {
             if (ConfigManager.getBool("enable_server_start_messages")) {
                 String startMessage = Parser.createStartMessage();
