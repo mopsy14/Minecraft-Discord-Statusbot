@@ -74,7 +74,15 @@ public class BotEvents extends ListenerAdapter {
     }
 
     @Override
-    public void onReady(ReadyEvent event) {
+    public void onReady(@NotNull ReadyEvent event) {
+        for(UserChannelPair id : BotManager.messagePrivateChannels) {
+            try {
+                BotManager.jda.openPrivateChannelById(id.user).complete();
+            } catch (Exception e) {
+                System.out.println("An exception occurred, while loading private channel of user with id:" + id.user);
+                e.printStackTrace();
+            }
+        }
         main.onBotReady();
     }
 }
