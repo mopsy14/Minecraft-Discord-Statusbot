@@ -20,6 +20,7 @@ public class StatusbotMain {
     private MinecraftServer server = null;
     private void initAll(){
         ConfigManager.init(this);
+        DataManager.getAllData(this);
     }
     void addConfigDefaults(YamlConfiguration configuration){
 
@@ -30,6 +31,7 @@ public class StatusbotMain {
         }
         return "";
     }
+    public void onBotReady(){
 
 
     public StatusbotMain() {
@@ -81,4 +83,5 @@ public class StatusbotMain {
         return res;
     }
 
+    }
 }
