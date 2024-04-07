@@ -3,3 +3,7 @@
 /.gradle/
 /build/
 /run/
+/logs/
+/run-data/
+/configs/
+/out/
