@@ -30,7 +30,7 @@ public class StatusbotMain {
     }
     String getConfigPath(){
         if(server != null && server.isDedicatedServer()){
-            return server.getServerDirectory().getAbsolutePath() + File.separator + "config";
+            return server.getServerDirectory().toAbsolutePath() + File.separator + "config";
         }
         return "";
     }
