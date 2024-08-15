@@ -29,14 +29,14 @@ public class StatusbotMain implements ModInitializer {
         if(BotManager.jda!=null) {
             if (ConfigManager.getBool("enable_server_start_messages")) {
                 String startMessage = Parser.createStartMessage();
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
                         if (channel != null)
                             channel.sendMessage(startMessage).queue();
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                         if (channel != null)
@@ -61,7 +61,7 @@ public class StatusbotMain implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             if(BotManager.jda!=null){
                 if (ConfigManager.getBool("enable_server_stop_messages")) {
-                    if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                    if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                         String stopMessage = Parser.createStopMessage();
                         for (long id : BotManager.messageTextChannels) {
                             TextChannel channel = BotManager.jda.getTextChannelById(id);
@@ -69,7 +69,7 @@ public class StatusbotMain implements ModInitializer {
                                 channel.sendMessage(stopMessage).queue();
                         }
                     }
-                    if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                    if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                         String stopMessage = Parser.createStopMessage();
                         for (UserChannelPair id : BotManager.messagePrivateChannels) {
                             PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
@@ -111,7 +111,7 @@ public class StatusbotMain implements ModInitializer {
                             serverPlayNetworkHandler.getPlayer().getEntityName(),
                             server.getPlayerNames().length+1
                     );
-                    if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                    if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                         for (long id : BotManager.messageTextChannels) {
                             TextChannel channel = BotManager.jda.getTextChannelById(id);
                             if (channel != null)
@@ -119,7 +119,7 @@ public class StatusbotMain implements ModInitializer {
 
                         }
                     }
-                    if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                    if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                         for (UserChannelPair id : BotManager.messagePrivateChannels) {
                             PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                             if (channel != null)
@@ -142,14 +142,14 @@ public class StatusbotMain implements ModInitializer {
                             serverPlayNetworkHandler.getPlayer().getEntityName(),
                             server.getPlayerNames().length-1
                     );
-                    if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                    if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                         for (long id : BotManager.messageTextChannels) {
                             TextChannel channel = BotManager.jda.getTextChannelById(id);
                             if (channel != null)
                                 channel.sendMessage(startMessage).queue();
                         }
                     }
-                    if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                    if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                         for (UserChannelPair id : BotManager.messagePrivateChannels) {
                             PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                             if (channel != null)
