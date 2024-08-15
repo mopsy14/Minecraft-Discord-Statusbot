@@ -53,7 +53,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
                         e.getPlayer().getName(),
                         getServer().getOnlinePlayers().size()
                 );
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
                         if (channel != null)
@@ -61,7 +61,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
 
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                         if (channel != null)
@@ -85,7 +85,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
                         e.getPlayer().getName(),
                         getServer().getOnlinePlayers().size()-1
                 );
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
                         if (channel != null)
@@ -93,7 +93,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
 
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                         if (channel != null)
@@ -127,7 +127,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
     public void onDisable() {
         if(BotManager.jda!=null){
             if (ConfigManager.getBool("enable_server_stop_messages")) {
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     String stopMessage = Parser.createStopMessage();
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
@@ -136,7 +136,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
 
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     String stopMessage = Parser.createStopMessage();
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
@@ -169,7 +169,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
         if(BotManager.jda!=null) {
             if (ConfigManager.getBool("enable_server_start_messages")) {
                 String startMessage = Parser.createStartMessage();
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
                         if (channel != null)
@@ -177,7 +177,7 @@ public class StatusbotMain extends JavaPlugin implements Listener {
 
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                         if (channel != null)
