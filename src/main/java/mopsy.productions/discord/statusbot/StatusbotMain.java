@@ -37,14 +37,14 @@ public class StatusbotMain {
         if(BotManager.jda!=null) {
             if (ConfigManager.getBool("enable_server_start_messages")) {
                 String startMessage = Parser.createStartMessage();
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
                         if (channel != null)
                             channel.sendMessage(startMessage).queue();
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                         if (channel != null)
@@ -75,7 +75,7 @@ public class StatusbotMain {
     public void stop(final ServerStoppingEvent event){
         if(BotManager.jda!=null){
             if (ConfigManager.getBool("enable_server_stop_messages")) {
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     String stopMessage = Parser.createStopMessage();
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
@@ -83,7 +83,7 @@ public class StatusbotMain {
                             channel.sendMessage(stopMessage).queue();
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     String stopMessage = Parser.createStopMessage();
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
@@ -126,7 +126,7 @@ public class StatusbotMain {
                         event.getEntity().getName().getString(),
                         server.getPlayerNames().length
                 );
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
                         if (channel != null)
@@ -134,7 +134,7 @@ public class StatusbotMain {
 
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                         if (channel != null)
@@ -159,7 +159,7 @@ public class StatusbotMain {
                         event.getEntity().getName().getString(),
                         server.getPlayerNames().length-1
                 );
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
+                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
                         TextChannel channel = BotManager.jda.getTextChannelById(id);
                         if (channel != null)
@@ -167,7 +167,7 @@ public class StatusbotMain {
 
                     }
                 }
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
+                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
                     for (UserChannelPair id : BotManager.messagePrivateChannels) {
                         PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
                         if (channel != null)
