@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'mopsy.productions'
-version = '18.0'
+version = '18.1'
 
 repositories {
     mavenCentral()
@@ -50,6 +50,8 @@ processResources {
         expand props
     }
 }
+
+jar.finalizedBy(shadowJar)
 
 shadowJar{
     minimize()
