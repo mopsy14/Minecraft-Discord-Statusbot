@@ -20,7 +20,7 @@ apply plugin: 'maven-publish'
 
 apply plugin : "com.github.johnrengelman.shadow"
 
-version = '18.0'
+version = '18.1'
 group = 'mopsy.productions.discord.statusbot' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'Minecraft_Discord_Statusbot'
 
