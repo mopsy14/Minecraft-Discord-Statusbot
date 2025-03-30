@@ -16,9 +16,22 @@ public class StatusbotMain {
                 "Options are true/false",
                 "This will enable or disable the sending of the player leave message in both server and private channels."));
         ConfigManager.addConfigKey(configuration,"embed_content",String.join(
-                "\n",
-                "status: $server-status$",
-        ));
+                "status: $server-status$"),
+                String.join(
+                    "\n",
+                    "",
+                    "This is the text displayed below the title of embeds",
+                    "Possible placeholders are:",
+                    "$CPL$ the name of the player that joined",
+                    "$AOP$ being the number of players currently online on the server",
+                    "$PL$ being a list of player names separated by 'embed_player_separator_text'"));
+        ConfigManager.addConfigKey(configuration,"player_separator_text",", ",
+                String.join(
+                        "\n",
+                        "",
+                        "Enter the character(s) displayed between every player name in embeds.",
+                        "Changing this to '---' would for example result in:",
+                        "playername1---playername2---playername3---playername4"));
     }
     String getConfigPath(){
         return "";
@@ -26,7 +39,7 @@ public class StatusbotMain {
     public void onBotReady(){
 
     }
-    private void regEmbedVarProviders(){
+    public void regDefaultEmbedVarProviders(){
         EmbedManager.regVarSupplier("server-status",(statusbotMain) -> statusbotMain.online?":green_circle:":":red_circle:");
     }
 }
