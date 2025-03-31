@@ -83,6 +83,14 @@ public class BotEvents extends ListenerAdapter {
                 e.printStackTrace();
             }
         }
+        for(SentEmbedData embedData : EmbedManager.sentEmbeds){
+            try {
+                BotManager.jda.openPrivateChannelById(embedData.user).complete();
+            } catch (Exception e) {
+                System.out.println("An exception occurred, while loading private channel of user with id:" + embedData.user);
+                e.printStackTrace();
+            }
+        }
         main.onBotReady();
     }
 }
