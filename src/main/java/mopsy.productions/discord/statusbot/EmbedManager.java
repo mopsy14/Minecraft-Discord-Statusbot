@@ -20,40 +20,41 @@ public class EmbedManager {
         System.out.println("Statusbot: Unknown variable: "+varName);
         return "";
     });
-    public static void sendEmbed(TextChannel textChannel, StatusbotMain statusbotMain){
-        MessageEmbed embed = new EmbedBuilder()
-                .setTitle(ConfigManager.getStr("embed_title"))
-                .setDescription(createDescription(statusbotMain))
-                .build();
-
-        textChannel.sendMessageEmbeds(embed).queue(e->{
+    private static String lastEmbedDescription = "";
+    private static String lastEmbedTitle = "";
+    public static void sendEmbed(TextChannel textChannel, String title, String description){
+        textChannel.sendMessageEmbeds(generateEmbed(title, description)).queue(e->{
             if (textChannel instanceof PrivateChannel privateChannel)
                 sentEmbeds.add(new SentEmbedData(e.getIdLong(),privateChannel.getIdLong(),e.getChannel().getIdLong()));
             else
                 sentEmbeds.add(new SentEmbedData(e.getIdLong(),e.getChannel().getIdLong()));
         });
     }
-    public static MessageEmbed generateEmbed(StatusbotMain statusbotMain){
+    private static MessageEmbed generateEmbed(String title, String description){
          return new EmbedBuilder()
-                 .setTitle(ConfigManager.getStr("embed_title"))
-                 .setDescription(createDescription(statusbotMain))
+                 .setTitle(title)
+                 .setDescription(description)
                  .build();
     }
-    public static void updateAllEmbeds(StatusbotMain statusbotMain){
-        MessageEmbed embed = generateEmbed(statusbotMain);
-        for(SentEmbedData embedData : sentEmbeds){
-            if(embedData.isInPrivateChannel) {
-                PrivateChannel channel = BotManager.jda.getPrivateChannelById(embedData.channel);
-                if(channel!=null)
-                    channel.editMessageEmbedsById(embedData.message, embed).queue();
-                else
-                    System.out.println("Statusbot: Private channel with ID " + embedData.channel + " for embed could not be found!");
-            }else{
-                TextChannel channel = BotManager.jda.getChannelById(TextChannel.class,embedData.channel);
-                if(channel!=null)
-                    channel.editMessageEmbedsById(embedData.message,embed).queue();
-                else
-                    System.out.println("Statusbot: Text channel with ID " + embedData.channel + " for embed could not be found!");
+    public static void updateAllEmbeds(String title, String description){
+        if (!title.equals(lastEmbedTitle) || !description.equals(lastEmbedDescription)){
+            lastEmbedTitle=title;
+            lastEmbedDescription=description;
+            MessageEmbed embed = generateEmbed(title, description);
+            for (SentEmbedData embedData : sentEmbeds) {
+                if (embedData.isInPrivateChannel) {
+                    PrivateChannel channel = BotManager.jda.getPrivateChannelById(embedData.channel);
+                    if (channel != null)
+                        channel.editMessageEmbedsById(embedData.message, embed).queue();
+                    else
+                        System.out.println("Statusbot: Private channel with ID " + embedData.channel + " for embed could not be found!");
+                } else {
+                    TextChannel channel = BotManager.jda.getChannelById(TextChannel.class, embedData.channel);
+                    if (channel != null)
+                        channel.editMessageEmbedsById(embedData.message, embed).queue();
+                    else
+                        System.out.println("Statusbot: Text channel with ID " + embedData.channel + " for embed could not be found!");
+                }
             }
         }
     }
@@ -65,7 +66,7 @@ public class EmbedManager {
         backupVarSupplier=supplier;
     }
 
-    private static String createDescription(StatusbotMain statusbotMain){
+    public static String createDescription(StatusbotMain statusbotMain){
         String res= "";
         char[] partVarName = null;
         int partVarNameLength = 0;
@@ -77,8 +78,13 @@ public class EmbedManager {
                     partVarName = new char[embedCharacters.length-2];
                     partVarNameLength = 0;
                 }else{
-                    Function<StatusbotMain,String> varSupplier = varSuppliers.get(String.valueOf(partVarName).substring(0,partVarNameLength));
-                    res = res.concat(varSupplier==null?"":varSupplier.apply(statusbotMain));
+                    String varName = String.valueOf(partVarName).substring(0,partVarNameLength);
+                    Function<StatusbotMain,String> varSupplier = varSuppliers.get(varName);
+                    if (varSupplier!=null){
+                        res = res.concat(varSupplier.apply(statusbotMain));
+                    }else {
+                        res = res.concat(backupVarSupplier.apply(statusbotMain,varName));
+                    }
                 }
             }else{
                 if(readingVarName){
