@@ -18,7 +18,7 @@ public class EmbedManager {
     private static final Map<String, Function<StatusbotMain,String>> varSuppliers = new HashMap<>();
     private static BiFunction<StatusbotMain,String,String> backupVarSupplier = ((statusbotMain, varName) -> {
         System.out.println("Statusbot: Unknown variable: "+varName);
-        return "";
+        return varName;
     });
     private static String lastEmbedDescription = "";
     private static String lastEmbedTitle = "";
