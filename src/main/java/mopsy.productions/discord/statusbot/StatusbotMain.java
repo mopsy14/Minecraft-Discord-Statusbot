@@ -25,7 +25,7 @@ public class StatusbotMain {
                     "$CPL$ the name of the player that joined",
                     "$AOP$ being the number of players currently online on the server",
                     "$PL$ being a list of player names separated by 'embed_player_separator_text'"));
-        ConfigManager.addConfigKey(configuration,"player_separator_text",", ",
+        ConfigManager.addConfigKey(configuration,"embed_player_separator_text",", ",
                 String.join(
                         "\n",
                         "",
