@@ -45,6 +45,21 @@ public class BotEvents extends ListenerAdapter {
                 }
                 break;
             }
+            case "!sendembed": {
+                if (event.getChannelType() == ChannelType.PRIVATE) {
+                    EmbedManager.sendEmbed(main,event.getChannel().asTextChannel());
+                    System.out.println("Private channel with ID " + event.getChannel().getIdLong() + " of user: " + event.getAuthor().getName() + " with ID " + event.getAuthor().getIdLong() + " requested an embed");
+                }
+                if (event.getChannelType() == ChannelType.TEXT) {
+                    if (PermissionUtil.checkPermission(event.getGuildChannel().getPermissionContainer(), event.getMember(), Permission.MANAGE_CHANNEL)) {
+                        EmbedManager.sendEmbed(main,event.getChannel().asTextChannel());
+                        System.out.println("Text channel with ID " + event.getChannel().getIdLong() + " of server: " + event.getGuild().getName() + " with ID " + event.getGuild().getIdLong() + " now has an embed");
+                    }else{
+                        event.getMessage().reply("You need the manage channel permission for this channel to use this command").queue();
+                    }
+                }
+                break;
+            }
             case "!endregchannelformessages": {
                 if (event.getChannelType() == ChannelType.PRIVATE && ConfigManager.getBool("enable_direct_message_status_messages")) {
                     if(BotManager.messagePrivateChannels.remove(new UserChannelPair(event.getAuthor().getIdLong(), event.getChannel().getIdLong()))){
@@ -69,7 +84,7 @@ public class BotEvents extends ListenerAdapter {
                 break;
             }
             case "!help": {
-                event.getMessage().reply("Possible commands are:\n!help\n!regChannelForMessages\n!endRegChannelForMessages").queue();
+                event.getMessage().reply("Possible commands are:\n!help\n!regChannelForMessages\n!endRegChannelForMessages\n!sendEmbed").queue();
                 break;
             }
         }
@@ -87,6 +102,8 @@ public class BotEvents extends ListenerAdapter {
         }
         for (int i = EmbedManager.sentEmbeds.size()-1; i >= 0; i--) {
             SentEmbedData embedData = EmbedManager.sentEmbeds.get(i);
+            if(!embedData.isInPrivateChannel)
+                continue;
             try {
                 BotManager.jda.openPrivateChannelById(embedData.user).complete();
             } catch (ErrorResponseException e){

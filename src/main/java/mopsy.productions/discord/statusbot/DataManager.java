@@ -157,7 +157,7 @@ public class DataManager {
                         try {
                             res.add(new SentEmbedData(Long.parseLong(channel), Long.parseLong(message), Long.parseLong(user)));
                         } catch (NumberFormatException numberFormatException) {
-                            System.out.println("Statusbot: Something went wrong while trying to read a number from " + embeds_file.getAbsoluteFile());
+                            System.out.println("Statusbot: Something went wrong while trying to read a number from " + private_embeds_file.getAbsoluteFile());
                             System.out.println("Statusbot: " + channel + ", " + message + "or"+ user + " isn't a valid long");
                             numberFormatException.printStackTrace();
                         }
