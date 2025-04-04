@@ -16,6 +16,7 @@ public class StatusbotMain {
                 "Options are true/false",
                 "This will enable or disable the sending of the player leave message in both server and private channels."));
         ConfigManager.addConfigKey(configuration,"embed_content",String.join(
+                "\n",
                 "status: $server-status$"),
                 String.join(
                     "\n",

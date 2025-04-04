@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 
@@ -23,15 +24,14 @@ public class EmbedManager {
     });
     private static String lastEmbedDescription = "";
     private static String lastEmbedTitle = "";
-    public static void sendEmbed(StatusbotMain statusbotMain, TextChannel textChannel){
+    public static void sendEmbed(StatusbotMain statusbotMain, MessageChannel messageChannel){
         String title = parseEmbedText(statusbotMain,ConfigManager.getStr("embed_title"));
         String description = parseEmbedText(statusbotMain,ConfigManager.getStr("embed_content"));
-        textChannel.sendMessageEmbeds(generateEmbed(title, description)).queue(e->{
-            TextChannel channel = e.getChannel().asTextChannel();
-            if (channel instanceof PrivateChannel)
-                sentEmbeds.add(new SentEmbedData(channel.getIdLong(), e.getIdLong(), ((PrivateChannel) channel).getUser().getIdLong()));
+        messageChannel.sendMessageEmbeds(generateEmbed(title, description)).queue(e->{
+            if (e.getChannel() instanceof PrivateChannel)
+                sentEmbeds.add(new SentEmbedData(e.getChannel().getIdLong(), e.getIdLong(), e.getChannel().asPrivateChannel().getUser().getIdLong()));
             else
-                sentEmbeds.add(new SentEmbedData(channel.getIdLong(), e.getIdLong()));
+                sentEmbeds.add(new SentEmbedData(e.getChannel().getIdLong(), e.getIdLong()));
         });
     }
     private static MessageEmbed generateEmbed(String title, String description){

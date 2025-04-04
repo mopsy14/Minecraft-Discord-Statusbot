@@ -47,7 +47,7 @@ public class BotEvents extends ListenerAdapter {
             }
             case "!sendembed": {
                 if (event.getChannelType() == ChannelType.PRIVATE) {
-                    EmbedManager.sendEmbed(main,event.getChannel().asTextChannel());
+                    EmbedManager.sendEmbed(main,event.getChannel());
                     System.out.println("Private channel with ID " + event.getChannel().getIdLong() + " of user: " + event.getAuthor().getName() + " with ID " + event.getAuthor().getIdLong() + " requested an embed");
                 }
                 if (event.getChannelType() == ChannelType.TEXT) {
