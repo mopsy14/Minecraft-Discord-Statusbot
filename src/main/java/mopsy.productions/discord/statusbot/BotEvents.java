@@ -4,7 +4,9 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -83,9 +85,19 @@ public class BotEvents extends ListenerAdapter {
                 e.printStackTrace();
             }
         }
-        for(SentEmbedData embedData : EmbedManager.sentEmbeds){
+        for (int i = EmbedManager.sentEmbeds.size()-1; i >= 0; i--) {
+            SentEmbedData embedData = EmbedManager.sentEmbeds.get(i);
             try {
                 BotManager.jda.openPrivateChannelById(embedData.user).complete();
+            } catch (ErrorResponseException e){
+                if(e.getErrorResponse() == ErrorResponse.UNKNOWN_USER) {
+                    System.out.println("Statusbot: The user with ID " + embedData.user + " couldn't be found");
+                    System.out.println("Statusbot: Removing the embed from update list");
+                    EmbedManager.sentEmbeds.remove(i);
+                }else{
+                    System.out.println("An exception occurred, while loading private channel of user with id:" + embedData.user);
+                    e.printStackTrace();
+                }
             } catch (Exception e) {
                 System.out.println("An exception occurred, while loading private channel of user with id:" + embedData.user);
                 e.printStackTrace();

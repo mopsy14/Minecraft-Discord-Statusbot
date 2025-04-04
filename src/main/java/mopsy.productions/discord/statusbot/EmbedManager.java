@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,9 +29,9 @@ public class EmbedManager {
         textChannel.sendMessageEmbeds(generateEmbed(title, description)).queue(e->{
             TextChannel channel = e.getChannel().asTextChannel();
             if (channel instanceof PrivateChannel)
-                sentEmbeds.add(new SentEmbedData(e.getIdLong(), ((PrivateChannel) channel).getUser().getIdLong(), channel.getIdLong()));
+                sentEmbeds.add(new SentEmbedData(channel.getIdLong(), e.getIdLong(), ((PrivateChannel) channel).getUser().getIdLong()));
             else
-                sentEmbeds.add(new SentEmbedData(e.getIdLong(), channel.getIdLong()));
+                sentEmbeds.add(new SentEmbedData(channel.getIdLong(), e.getIdLong()));
         });
     }
     private static MessageEmbed generateEmbed(String title, String description){
@@ -49,19 +51,36 @@ public class EmbedManager {
     }
     public static void updateAllEmbeds(String title, String description) {
         MessageEmbed embed = generateEmbed(title, description);
-        for (SentEmbedData embedData : sentEmbeds) {
+        for (int i = sentEmbeds.size()-1; i >= 0; i--) {
+            SentEmbedData embedData = sentEmbeds.get(i);
             if (embedData.isInPrivateChannel) {
                 PrivateChannel channel = BotManager.jda.getPrivateChannelById(embedData.channel);
                 if (channel != null)
-                    channel.editMessageEmbedsById(embedData.message, embed).queue();
-                else
+                    channel.editMessageEmbedsById(embedData.message, embed).queue(null,
+                            new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, (exception)->{
+                                System.out.println("Statusbot: Embed message with ID " + embedData.message + " could not be found!");
+                                System.out.println("Statusbot: Removing the embed from update list");
+                                sentEmbeds.remove(embedData);
+                            }));
+                else {
                     System.out.println("Statusbot: Private channel with ID " + embedData.channel + " for embed could not be found!");
+                    System.out.println("Statusbot: Removing the embed from update list");
+                    sentEmbeds.remove(i);
+                }
             } else {
                 TextChannel channel = BotManager.jda.getChannelById(TextChannel.class, embedData.channel);
                 if (channel != null)
-                    channel.editMessageEmbedsById(embedData.message, embed).queue();
-                else
+                    channel.editMessageEmbedsById(embedData.message, embed).queue(null,
+                            new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, (exception)->{
+                                System.out.println("Statusbot: Embed message with ID " + embedData.message + " could not be found!");
+                                System.out.println("Statusbot: Removing the embed from update list");
+                                sentEmbeds.remove(embedData);
+                            }));
+                else {
                     System.out.println("Statusbot: Text channel with ID " + embedData.channel + " for embed could not be found!");
+                    System.out.println("Statusbot: Removing the embed from update list");
+                    sentEmbeds.remove(i);
+                }
             }
         }
     }
