@@ -8,6 +8,7 @@ public class StatusbotMain {
     private void initAll(){
         ConfigManager.init(this);
         DataManager.getAllData(this);
+        regDefaultEmbedVarProviders();
     }
     void addConfigDefaults(YamlFile configuration){
         ConfigManager.addConfigKey(configuration,"embed_title","Minecraft Server Status",String.join(
