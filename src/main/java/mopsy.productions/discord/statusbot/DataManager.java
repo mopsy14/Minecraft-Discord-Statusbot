@@ -242,9 +242,9 @@ public class DataManager {
                  BufferedWriter writer = new BufferedWriter(new FileWriter(embed_file))) {
                 for (SentEmbedData sentEmbedData : embedDataList) {
                     if (sentEmbedData.isInPrivateChannel) {
-                        private_writer.write(sentEmbedData.user + "\n");
                         private_writer.write(sentEmbedData.channel + "\n");
                         private_writer.write(sentEmbedData.message + "\n");
+                        private_writer.write(sentEmbedData.user + "\n");
                     } else {
                         writer.write(sentEmbedData.channel + "\n");
                         writer.write(sentEmbedData.message + "\n");
