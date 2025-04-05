@@ -30,8 +30,8 @@ public class StatusbotMain extends JavaPlugin implements Listener {
         ConfigManager.addConfigKey(configuration,"embed_title","Minecraft Server Status",String.join(
                 "\n",
                 "",
-                "Options are true/false",
-                "This will enable or disable the sending of the player leave message in both server and private channels."));
+                "The title of the embeds sent by the statusbot",
+                "For all possible placeholders, see 'embed_content'"));
         ConfigManager.addConfigKey(configuration,"embed_content",String.join("\n",
                         "status: $server-status$",
                         "$amount-of-players$/$max-players$ players online:",
