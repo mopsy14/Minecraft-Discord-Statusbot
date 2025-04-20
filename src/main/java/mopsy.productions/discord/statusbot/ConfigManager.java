@@ -15,7 +15,7 @@ public class ConfigManager {
         configFile = new File(statusbotMain.getConfigPath() + File.separator +"statusbot_config.yml");
         try {
             configuration = new YamlFile(configFile);
-            ConfigManager.configuration.options().quoteStyleDefaults().setDefaultQuoteStyle(QuoteStyle.SINGLE);
+            ConfigManager.configuration.options().quoteStyleDefaults().setDefaultQuoteStyle(QuoteStyle.DOUBLE);
             configuration.createOrLoadWithComments();
 
             createDefaults(statusbotMain);
