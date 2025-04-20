@@ -13,7 +13,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import mopsy.productions.velocitytemplate.BuildConstants;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import org.simpleyaml.configuration.file.YamlConfiguration;
+import net.kyori.adventure.text.TextComponent;
+import okhttp3.OkHttpClient;
 import org.simpleyaml.configuration.file.YamlFile;
 
 import java.nio.file.Path;
@@ -21,6 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 @Plugin(
@@ -28,7 +30,7 @@ import java.util.logging.Logger;
         name = "Discord Statusbot",
         version = BuildConstants.VERSION,
         authors = {"Mopsy"},
-        description = "This plugin will host a statusbot on discord",
+        description = "This plugin will host a statusbot on Discord",
         url = "https://github.com/mopsy14/Minecraft-Discord-Statusbot/wiki/Getting-started"
 )
 public class StatusbotMain {
@@ -55,19 +57,21 @@ public class StatusbotMain {
         ConfigManager.addConfigKey(configuration,"embed_title","Minecraft Server Status",String.join(
                 "\n",
                 "",
-                "Options are true/false",
-                "This will enable or disable the sending of the player leave message in both server and private channels."));
+                "The title of the embeds sent by the statusbot",
+                "For all possible placeholders, see 'embed_content'"));
         ConfigManager.addConfigKey(configuration,"embed_content",String.join(
                 "\n",
-                "status: $server-status$"),
+                        "status: $server-status$",
+                        "$amount-of-players$/$max-players$ players online:",
+                        "$player-list$"),
                 String.join(
-                    "\n",
-                    "",
-                    "This is the text displayed below the title of embeds",
-                    "Possible placeholders are:",
-                    "$CPL$ the name of the player that joined",
-                    "$AOP$ being the number of players currently online on the server",
-                    "$PL$ being a list of player names separated by 'embed_player_separator_text'"));
+                        "\n",
+                        "",
+                        "$server-status$ A red (offline) or green (online) circle telling whether the server is online",
+                        "$amount-of-players$ The number of players currently online on the server",
+                        "$max-players$ The maximum number of players that can play on the server",
+                        "$motd$ The message of the day of the server",
+                        "$player-list$ A list of player names separated by 'embed_player_separator_text'"));
         ConfigManager.addConfigKey(configuration,"embed_player_separator_text",", ",
                 String.join(
                         "\n",
@@ -110,6 +114,9 @@ public class StatusbotMain {
                     }
                 }
             }
+            server.getScheduler().buildTask(this,
+                            () -> EmbedManager.tryUpdateAllEmbeds(StatusbotMain.this)
+                    ).repeat(10, TimeUnit.SECONDS).schedule();
         }
     }
 
@@ -208,6 +215,8 @@ public class StatusbotMain {
                     }
                 }
             }
+            online=false;
+            EmbedManager.tryUpdateAllEmbeds(this);
         }
         DataManager.saveAllData(this);
         try {
@@ -226,9 +235,16 @@ public class StatusbotMain {
                 throw new RuntimeException(e);
             }
 
+            OkHttpClient client = BotManager.jda.getHttpClient();
+            client.connectionPool().evictAll();
+            client.dispatcher().executorService().shutdownNow();
         }
     }
     public void regDefaultEmbedVarProviders(){
         EmbedManager.regVarSupplier("server-status",(statusbotMain) -> statusbotMain.online?":green_circle:":":red_circle:");
+        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain -> String.valueOf(statusbotMain.server.getPlayerCount())));
+        EmbedManager.regVarSupplier("player-list",(statusbotMain -> String.join(ConfigManager.getStr("embed_player_separator_text"),MakeStringList(statusbotMain.server.getAllPlayers()))));
+        EmbedManager.regVarSupplier("max-players",(statusbotMain -> String.valueOf(statusbotMain.server.getConfiguration().getShowMaxPlayers())));
+        EmbedManager.regVarSupplier("motd",(statusbotMain -> ((TextComponent) statusbotMain.server.getConfiguration().getMotd()).content()));
     }
 }
