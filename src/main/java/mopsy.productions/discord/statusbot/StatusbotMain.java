@@ -8,12 +8,14 @@ import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
+import okhttp3.OkHttpClient;
 import org.simpleyaml.configuration.file.YamlFile;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class StatusbotMain extends Plugin implements Listener {
     private boolean online = true;
@@ -27,19 +29,21 @@ public class StatusbotMain extends Plugin implements Listener {
         ConfigManager.addConfigKey(configuration,"embed_title","Minecraft Server Status",String.join(
                 "\n",
                 "",
-                "Options are true/false",
-                "This will enable or disable the sending of the player leave message in both server and private channels."));
+                "The title of the embeds sent by the statusbot",
+                "For all possible placeholders, see 'embed_content'"));
         ConfigManager.addConfigKey(configuration,"embed_content",String.join(
                 "\n",
-                "status: $server-status$"),
+                "status: $server-status$",
+                "$amount-of-players$/$max-players$ players online:",
+                "$player-list$"),
                 String.join(
-                    "\n",
-                    "",
-                    "This is the text displayed below the title of embeds",
-                    "Possible placeholders are:",
-                    "$CPL$ the name of the player that joined",
-                    "$AOP$ being the number of players currently online on the server",
-                    "$PL$ being a list of player names separated by 'embed_player_separator_text'"));
+                        "\n",
+                        "",
+                        "$server-status$ A red (offline) or green (online) circle telling whether the server is online",
+                        "$amount-of-players$ The number of players currently online on the server",
+                        "$max-players$ The maximum number of players that can play on the server",
+                        "$motd$ The message of the day of the server",
+                        "$player-list$ A list of player names separated by 'embed_player_separator_text'"));
         ConfigManager.addConfigKey(configuration,"embed_player_separator_text",", ",
                 String.join(
                         "\n",
@@ -77,7 +81,7 @@ public class StatusbotMain extends Plugin implements Listener {
 
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(()->MakeStringList(getProxy().getPlayers()),getProxy().getPlayers().size()),
+                Parser.createStatusMessage(()->MakeStringList(getProxy().getPlayers()),getProxy().getOnlineCount()),
                 this
         );
     }
@@ -101,13 +105,14 @@ public class StatusbotMain extends Plugin implements Listener {
                     }
                 }
             }
+            getProxy().getScheduler().schedule(this, () -> EmbedManager.tryUpdateAllEmbeds(StatusbotMain.this),0,10, TimeUnit.SECONDS);
         }
     }
     @EventHandler
     public void onJoin(ServerConnectedEvent e){
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(()->MakeStringList(getProxy().getPlayers()),getProxy().getPlayers().size()),
+                Parser.createStatusMessage(()->MakeStringList(getProxy().getPlayers()),getProxy().getOnlineCount()),
                 this
         );
         if(BotManager.jda!=null) {
@@ -115,7 +120,7 @@ public class StatusbotMain extends Plugin implements Listener {
                 String startMessage = Parser.createJoinMessage(
                         ()->MakeStringList(getProxy().getPlayers()),
                         e.getPlayer().getName(),
-                        getProxy().getPlayers().size()
+                        getProxy().getOnlineCount()
                 );
                 if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
@@ -139,7 +144,7 @@ public class StatusbotMain extends Plugin implements Listener {
     public void onLeave(PlayerDisconnectEvent e){
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(()->MakeStringList(getProxy().getPlayers(),e.getPlayer().getName()),getProxy().getPlayers().size()-1),
+                Parser.createStatusMessage(()->MakeStringList(getProxy().getPlayers(),e.getPlayer().getName()),getProxy().getOnlineCount()-1),
                 this
         );
         if(BotManager.jda!=null) {
@@ -147,7 +152,7 @@ public class StatusbotMain extends Plugin implements Listener {
                 String startMessage = Parser.createLeaveMessage(
                         ()->MakeStringList(getProxy().getPlayers(),e.getPlayer().getName()),
                         e.getPlayer().getName(),
-                        getProxy().getPlayers().size()-1
+                        getProxy().getOnlineCount()-1
                 );
                 if (ConfigManager.getBool("enable_text_channel_status_messages")) {
                     for (long id : BotManager.messageTextChannels) {
@@ -190,6 +195,8 @@ public class StatusbotMain extends Plugin implements Listener {
                     }
                 }
             }
+            online=false;
+            EmbedManager.tryUpdateAllEmbeds(this);
         }
         DataManager.saveAllData(this);
         try {
@@ -208,9 +215,16 @@ public class StatusbotMain extends Plugin implements Listener {
                 throw new RuntimeException(e);
             }
 
+            OkHttpClient client = BotManager.jda.getHttpClient();
+            client.connectionPool().evictAll();
+            client.dispatcher().executorService().shutdownNow();
         }
     }
     public void regDefaultEmbedVarProviders(){
         EmbedManager.regVarSupplier("server-status",(statusbotMain) -> statusbotMain.online?":green_circle:":":red_circle:");
+        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain -> String.valueOf(getProxy().getPlayers().size())));
+        EmbedManager.regVarSupplier("player-list",(statusbotMain -> String.join(ConfigManager.getStr("embed_player_separator_text"),MakeStringList(getProxy().getPlayers()))));
+        EmbedManager.regVarSupplier("max-players",(statusbotMain -> String.valueOf(getProxy().getConfig().getPlayerLimit())));
+        EmbedManager.regVarSupplier("amount-of-servers",(statusbotMain -> String.valueOf(getProxy().getServers().size())));
     }
 }
