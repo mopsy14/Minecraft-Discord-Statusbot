@@ -43,7 +43,8 @@ public class StatusbotMain extends Plugin implements Listener {
                         "$amount-of-players$ The number of players currently online on the server",
                         "$max-players$ The maximum number of players that can play on the server",
                         "$motd$ The message of the day of the server",
-                        "$player-list$ A list of player names separated by 'embed_player_separator_text'"));
+                        "$player-list$ A list of player names separated by 'embed_player_separator_text'",
+                        "$amount-of-servers$ The number of backend servers configured in the config of the proxy"));
         ConfigManager.addConfigKey(configuration,"embed_player_separator_text",", ",
                 String.join(
                         "\n",
