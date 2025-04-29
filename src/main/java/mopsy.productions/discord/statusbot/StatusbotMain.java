@@ -9,6 +9,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import okhttp3.OkHttpClient;
 import org.simpleyaml.configuration.file.YamlFile;
 
 import java.io.File;
@@ -22,6 +24,7 @@ import java.util.List;
 public class StatusbotMain {
     private MinecraftServer server = null;
     private boolean online = true;
+    private boolean isStopping = false;
     public void init(){initAll();}
     private void initAll(){
         ConfigManager.init(this);
@@ -32,19 +35,25 @@ public class StatusbotMain {
         ConfigManager.addConfigKey(configuration,"embed_title","Minecraft Server Status",String.join(
                 "\n",
                 "",
-                "Options are true/false",
-                "This will enable or disable the sending of the player leave message in both server and private channels."));
+                "The title of the embeds sent by the statusbot",
+                "For all possible placeholders, see 'embed_content'"));
         ConfigManager.addConfigKey(configuration,"embed_content",String.join(
-                "\n",
-                "status: $server-status$"),
+                        "\n",
+                        "status: $server-status$",
+                        "running on Minecraft $mc-version$",
+                        "$amount-of-players$/$max-players$ players online:",
+                        "$player-list$"),
                 String.join(
-                    "\n",
-                    "",
-                    "This is the text displayed below the title of embeds",
-                    "Possible placeholders are:",
-                    "$CPL$ the name of the player that joined",
-                    "$AOP$ being the number of players currently online on the server",
-                    "$PL$ being a list of player names separated by 'embed_player_separator_text'"));
+                        "\n",
+                        "",
+                        "This is the text displayed below the title of embeds",
+                        "Possible placeholders are:",
+                        "$server-status$ A red (offline) or green (online) circle telling whether the server is online",
+                        "$amount-of-players$ The number of players currently online on the server",
+                        "$max-players$ The maximum number of players that can play on the server",
+                        "$motd$ The message of the day of the server",
+                        "$player-list$ A list of player names separated by 'embed_player_separator_text'",
+                        "$mc-version$ The Minecraft version the server is running on"));
         ConfigManager.addConfigKey(configuration,"embed_player_separator_text",", ",
                 String.join(
                         "\n",
@@ -99,6 +108,7 @@ public class StatusbotMain {
 
     @SubscribeEvent
     public void stop(final ServerStoppingEvent event){
+        isStopping=true;
         if(BotManager.jda!=null){
             if (ConfigManager.getBool("enable_server_stop_messages")) {
                 if (ConfigManager.getBool("enable_text_channel_status_messages")) {
@@ -118,6 +128,8 @@ public class StatusbotMain {
                     }
                 }
             }
+            online=false;
+            EmbedManager.tryUpdateAllEmbeds(this);
         }
         DataManager.saveAllData(this);
         try {
@@ -136,6 +148,9 @@ public class StatusbotMain {
                 throw new RuntimeException(e);
             }
 
+            OkHttpClient client = BotManager.jda.getHttpClient();
+            client.connectionPool().evictAll();
+            client.dispatcher().executorService().shutdownNow();
         }
     }
     @SubscribeEvent
@@ -204,7 +219,16 @@ public class StatusbotMain {
         }
     }
 
-    private List<String> makeStringList(String[] players, String excluded){
+    @SubscribeEvent
+    public void tick(ServerTickEvent.Post event){
+        if(BotManager.jda!=null) {
+            if(event.getServer().getTickCount()%200==0){
+                EmbedManager.tryUpdateAllEmbeds(StatusbotMain.this);
+            }
+        }
+    }
+
+    private static List<String> makeStringList(String[] players, String excluded){
         List<String> res = new ArrayList<>(players.length-1);
         for(String player : players){
             if(!player.equals(excluded)){
@@ -215,5 +239,10 @@ public class StatusbotMain {
     }
     public void regDefaultEmbedVarProviders(){
         EmbedManager.regVarSupplier("server-status",(statusbotMain) -> statusbotMain.online?":green_circle:":":red_circle:");
+        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain -> String.valueOf(statusbotMain.isStopping?0:statusbotMain.server.getPlayerCount())));
+        EmbedManager.regVarSupplier("player-list",(statusbotMain -> statusbotMain.isStopping?"":String.join(ConfigManager.getStr("embed_player_separator_text"),Arrays.asList(statusbotMain.server.getPlayerNames()))));
+        EmbedManager.regVarSupplier("max-players",(statusbotMain -> String.valueOf(statusbotMain.server.getMaxPlayers())));
+        EmbedManager.regVarSupplier("motd",(statusbotMain -> statusbotMain.server.getMotd()));
+        EmbedManager.regVarSupplier("mc-version",(statusbotMain -> statusbotMain.server.getServerVersion()));
     }
 }
