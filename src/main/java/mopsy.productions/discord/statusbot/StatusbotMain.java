@@ -1,15 +1,18 @@
 package mopsy.productions.discord.statusbot;
 
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
+import okhttp3.OkHttpClient;
 import org.simpleyaml.configuration.file.YamlFile;
 
 import java.io.File;
@@ -18,10 +21,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Mod("discord_statusbot")
+@Mod("statusbot")
 public class StatusbotMain {
     private MinecraftServer server = null;
     private boolean online = true;
+    private boolean isStopping = false;
     public void init(){initAll();}
     private void initAll(){
         ConfigManager.init(this);
@@ -32,19 +36,25 @@ public class StatusbotMain {
         ConfigManager.addConfigKey(configuration,"embed_title","Minecraft Server Status",String.join(
                 "\n",
                 "",
-                "Options are true/false",
-                "This will enable or disable the sending of the player leave message in both server and private channels."));
+                "The title of the embeds sent by the statusbot",
+                "For all possible placeholders, see 'embed_content'"));
         ConfigManager.addConfigKey(configuration,"embed_content",String.join(
                 "\n",
-                "status: $server-status$"),
+                "status: $server-status$",
+                "running on Minecraft $mc-version$",
+                "$amount-of-players$/$max-players$ players online:",
+                "$player-list$"),
                 String.join(
-                    "\n",
-                    "",
-                    "This is the text displayed below the title of embeds",
-                    "Possible placeholders are:",
-                    "$CPL$ the name of the player that joined",
-                    "$AOP$ being the number of players currently online on the server",
-                    "$PL$ being a list of player names separated by 'embed_player_separator_text'"));
+                        "\n",
+                        "",
+                        "This is the text displayed below the title of embeds",
+                        "Possible placeholders are:",
+                        "$server-status$ A red (offline) or green (online) circle telling whether the server is online",
+                        "$amount-of-players$ The number of players currently online on the server",
+                        "$max-players$ The maximum number of players that can play on the server",
+                        "$motd$ The message of the day of the server",
+                        "$player-list$ A list of player names separated by 'embed_player_separator_text'",
+                        "$mc-version$ The Minecraft version the server is running on"));
         ConfigManager.addConfigKey(configuration,"embed_player_separator_text",", ",
                 String.join(
                         "\n",
@@ -84,10 +94,6 @@ public class StatusbotMain {
     public StatusbotMain() {
         MinecraftForge.EVENT_BUS.register(this);
     }
-    public void regDefaultEmbedVarProviders(){
-        EmbedManager.regVarSupplier("server-status",(statusbotMain) -> statusbotMain.online?":green_circle:":":red_circle:");
-    }
-
     @SubscribeEvent
     public void start(final FMLServerStartedEvent event) {
         server = event.getServer();
@@ -104,6 +110,7 @@ public class StatusbotMain {
 
     @SubscribeEvent
     public void stop(final FMLServerStoppingEvent event){
+        isStopping = true;
         if(BotManager.jda!=null){
             if (ConfigManager.getBool("enable_server_stop_messages")) {
                 if (ConfigManager.getBool("enable_text_channel_status_messages")) {
@@ -123,6 +130,8 @@ public class StatusbotMain {
                     }
                 }
             }
+            online=false;
+            EmbedManager.tryUpdateAllEmbeds(this);
         }
         DataManager.saveAllData(this);
         try {
@@ -141,6 +150,9 @@ public class StatusbotMain {
                 throw new RuntimeException(e);
             }
 
+            OkHttpClient client = BotManager.jda.getHttpClient();
+            client.connectionPool().evictAll();
+            client.dispatcher().executorService().shutdownNow();
         }
     }
 
@@ -210,6 +222,15 @@ public class StatusbotMain {
         }
     }
 
+    @SubscribeEvent
+    public void tick(TickEvent.ServerTickEvent event){
+        if (BotManager.jda!=null&&BotManager.jda.getStatus()== JDA.Status.CONNECTED) {
+            if(server.getTickCount()%200==0){
+                EmbedManager.tryUpdateAllEmbeds(this);
+            }
+        }
+    }
+
     private List<String> makeStringList(String[] players, String excluded){
         List<String> res = new ArrayList<>(players.length-1);
         for(String player : players){
@@ -220,4 +241,12 @@ public class StatusbotMain {
         return res;
     }
 
+    public void regDefaultEmbedVarProviders(){
+        EmbedManager.regVarSupplier("server-status",(statusbotMain) -> statusbotMain.online?":green_circle:":":red_circle:");
+        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain) -> String.valueOf(isStopping?0:server.getPlayerCount()));
+        EmbedManager.regVarSupplier("player-list",(statusbotMain) -> isStopping?"":String.join(ConfigManager.getStr("embed_player_separator_text"),Arrays.asList(server.getPlayerNames())));
+        EmbedManager.regVarSupplier("max-players",(statusbotMain) -> String.valueOf(server.getMaxPlayers()));
+        EmbedManager.regVarSupplier("motd",(statusbotMain) -> server.getMotd());
+        EmbedManager.regVarSupplier("mc-version",(statusbotMain) -> server.getServerVersion());
+    }
 }
