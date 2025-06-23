@@ -4,7 +4,9 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +45,21 @@ public class BotEvents extends ListenerAdapter {
                 }
                 break;
             }
+            case "!sendembed": {
+                if (event.getChannelType() == ChannelType.PRIVATE) {
+                    EmbedManager.sendEmbed(main,event.getChannel());
+                    System.out.println("Private channel with ID " + event.getChannel().getIdLong() + " of user: " + event.getAuthor().getName() + " with ID " + event.getAuthor().getIdLong() + " requested an embed");
+                }
+                if (event.getChannelType() == ChannelType.TEXT) {
+                    if (PermissionUtil.checkPermission(event.getGuildChannel().getPermissionContainer(), event.getMember(), Permission.MANAGE_CHANNEL)) {
+                        EmbedManager.sendEmbed(main,event.getChannel().asTextChannel());
+                        System.out.println("Text channel with ID " + event.getChannel().getIdLong() + " of server: " + event.getGuild().getName() + " with ID " + event.getGuild().getIdLong() + " now has an embed");
+                    }else{
+                        event.getMessage().reply("You need the manage channel permission for this channel to use this command").queue();
+                    }
+                }
+                break;
+            }
             case "!endregchannelformessages": {
                 if (event.getChannelType() == ChannelType.PRIVATE && ConfigManager.getBool("enable_direct_message_status_messages")) {
                     if(BotManager.messagePrivateChannels.remove(new UserChannelPair(event.getAuthor().getIdLong(), event.getChannel().getIdLong()))){
@@ -67,7 +84,7 @@ public class BotEvents extends ListenerAdapter {
                 break;
             }
             case "!help": {
-                event.getMessage().reply("Possible commands are:\n!help\n!regChannelForMessages\n!endRegChannelForMessages").queue();
+                event.getMessage().reply("Possible commands are:\n!help\n!regChannelForMessages\n!endRegChannelForMessages\n!sendEmbed").queue();
                 break;
             }
         }
@@ -80,6 +97,26 @@ public class BotEvents extends ListenerAdapter {
                 BotManager.jda.openPrivateChannelById(id.user).complete();
             } catch (Exception e) {
                 System.out.println("An exception occurred, while loading private channel of user with id:" + id.user);
+                e.printStackTrace();
+            }
+        }
+        for (int i = EmbedManager.sentEmbeds.size()-1; i >= 0; i--) {
+            SentEmbedData embedData = EmbedManager.sentEmbeds.get(i);
+            if(!embedData.isInPrivateChannel)
+                continue;
+            try {
+                BotManager.jda.openPrivateChannelById(embedData.user).complete();
+            } catch (ErrorResponseException e){
+                if(e.getErrorResponse() == ErrorResponse.UNKNOWN_USER) {
+                    System.out.println("Statusbot: The user with ID " + embedData.user + " couldn't be found");
+                    System.out.println("Statusbot: Removing the embed from update list");
+                    EmbedManager.sentEmbeds.remove(i);
+                }else{
+                    System.out.println("An exception occurred, while loading private channel of user with id:" + embedData.user);
+                    e.printStackTrace();
+                }
+            } catch (Exception e) {
+                System.out.println("An exception occurred, while loading private channel of user with id:" + embedData.user);
                 e.printStackTrace();
             }
         }
