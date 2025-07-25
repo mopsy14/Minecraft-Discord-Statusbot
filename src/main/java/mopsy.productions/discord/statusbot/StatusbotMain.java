@@ -19,7 +19,9 @@ import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Mod("statusbot")
 public class StatusbotMain {
@@ -243,10 +245,25 @@ public class StatusbotMain {
     }
     public void regDefaultEmbedVarProviders(){
         EmbedManager.regVarSupplier("server-status",(statusbotMain) -> statusbotMain.online?":green_circle:":":red_circle:");
-        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain) -> String.valueOf(isStopping?0:server.getPlayerCount()));
+        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain) -> String.valueOf(isStopping ? "0" : callMethodWithAlts(()->server.getPlayerCount(),"m_7416_")));
         EmbedManager.regVarSupplier("player-list",(statusbotMain) -> isStopping?"":String.join(ConfigManager.getStr("embed_player_separator_text"),Arrays.asList(server.getPlayerNames())));
-        EmbedManager.regVarSupplier("max-players",(statusbotMain) -> String.valueOf(server.getMaxPlayers()));
+        EmbedManager.regVarSupplier("max-players",(statusbotMain) -> String.valueOf(callMethodWithAlts(()->server.getMaxPlayers(),"m_7418_")));
         EmbedManager.regVarSupplier("motd",(statusbotMain) -> server.getMotd());
-        EmbedManager.regVarSupplier("mc-version",(statusbotMain) -> server.getServerVersion());
+        EmbedManager.regVarSupplier("mc-version",(statusbotMain) -> callMethodWithAlts(()->server.getServerVersion(),"m_7630_"));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T callMethodWithAlts(Supplier<T> defaultMethod, String... alternatives){
+        try {
+            return defaultMethod.get();
+        }catch (NoSuchMethodError e){
+            Iterator<String> alternativesIterator = Arrays.stream(alternatives).iterator();
+            while (alternativesIterator.hasNext()) {
+                try {
+                    return (T) server.getClass().getMethod(alternativesIterator.next()).invoke(server);
+                }catch(Exception ignored){}
+            }
+            throw e;
+        }
     }
 }
