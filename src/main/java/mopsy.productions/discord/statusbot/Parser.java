@@ -54,7 +54,7 @@ public class Parser {
             case"PL":
                 return String.join(Csepstr, playersSupplier.get());
             default:
-                System.out.println("Statusbot: Unknown variable: " + varName);
+                LogUtils.log("Unknown variable: " + varName, true);
                 return "";
         }
     }
@@ -103,7 +103,7 @@ public class Parser {
             case"CPL":
                 return joinedPlayer;
             default:
-                System.out.println("Statusbot: Unknown variable: " + varName);
+                LogUtils.log("Unknown variable: " + varName, true);
                 return "";
         }
     }
@@ -152,7 +152,7 @@ public class Parser {
             case"CPL":
                 return leftPlayer;
             default:
-                System.out.println("Statusbot: Unknown variable: " + varName);
+                LogUtils.log("Unknown variable: " + varName, true);
                 return "";
         }
     }
