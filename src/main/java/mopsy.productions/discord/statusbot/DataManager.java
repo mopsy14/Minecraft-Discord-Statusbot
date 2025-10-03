@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataManager {
-    public static void getAllData(StatusbotMain statusbotMain) {
+    public static void getAllData(IStatusbotMain statusbotMain) {
         File dataFileFolder = new File(statusbotMain.getConfigPath() + File.separator + "Statusbot_Data");
         if (dataFileFolder.exists()) {
             if (dataFileFolder.isDirectory()) {
@@ -171,7 +171,7 @@ public class DataManager {
         return res;
     }
 
-    public static void saveAllData(StatusbotMain statusbotMain) {
+    public static void saveAllData(IStatusbotMain statusbotMain) {
         File dataFileFolder = new File(statusbotMain.getConfigPath() + File.separator + "Statusbot_Data");
         if (dataFileFolder.exists()) {
             if (dataFileFolder.isDirectory()) {
