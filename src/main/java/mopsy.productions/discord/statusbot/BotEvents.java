@@ -6,13 +6,16 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class BotEvents extends ListenerAdapter {
-    public static StatusbotMain main;
-    public BotEvents(StatusbotMain main){
+    public static IStatusbotMain main;
+    public BotEvents(IStatusbotMain main){
         BotEvents.main = main;
     }
 
@@ -91,7 +94,88 @@ public class BotEvents extends ListenerAdapter {
     }
 
     @Override
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        String commandName = event.getName();
+        switch (commandName) {
+            case "help": {
+                event.reply("Possible commands are:\n/help\n/sendembed\n/regchannelformessages\n/endregchannelformessages").setEphemeral(true).queue();
+                break;
+            }
+            case "sendembed": {
+                if (event.getChannelType() == ChannelType.PRIVATE) {
+                    EmbedManager.sendEmbed(main, event.getChannel());
+                    System.out.println("Private channel with ID " + event.getChannel().getIdLong() + " of user: " + event.getUser().getName() + " with ID " + event.getUser().getIdLong() + " requested an embed");
+                }
+                if (event.getChannelType() == ChannelType.TEXT) {
+                    EmbedManager.sendEmbed(main, event.getChannel().asTextChannel());
+                    event.reply("Embed sent").setEphemeral(true).queue();
+                    System.out.println("Text channel with ID " + event.getChannel().getIdLong() + " of server: " + event.getGuild().getName() + " with ID " + event.getGuild().getIdLong() + " now has an embed");
+                }
+                break;
+            }
+            case "regchannelformessages": {
+                if (event.getChannelType() == ChannelType.PRIVATE && ConfigManager.getBool("enable_direct_message_status_messages")) {
+                    if (BotManager.messagePrivateChannels.contains(new UserChannelPair(event.getUser().getIdLong(), event.getChannel().getIdLong()))) {
+                        event.reply("Channel was already registered, nothing changed").setEphemeral(true).queue();
+                    } else {
+                        BotManager.messagePrivateChannels.add(new UserChannelPair(event.getUser().getIdLong(), event.getChannel().getIdLong()));
+                        event.reply("Channel registered").setEphemeral(true).queue();
+                        System.out.println("Private channel with ID " + event.getChannel().getIdLong() + " of user: " + event.getUser().getName() + " with ID " + event.getUser().getIdLong() + " was registered");
+                    }
+                }
+                if (event.getChannelType() == ChannelType.TEXT && ConfigManager.getBool("enable_text_channel_status_messages")) {
+                    if (BotManager.messageTextChannels.contains(event.getChannel().getIdLong())) {
+                        event.reply("Channel was already registered, nothing changed").setEphemeral(true).queue();
+                    } else {
+                        BotManager.messageTextChannels.add(event.getChannel().getIdLong());
+                        event.reply("Channel registered").setEphemeral(true).queue();
+                        System.out.println("Text channel with ID " + event.getChannel().getIdLong() + " of server: " + event.getGuild().getName() + " with ID " + event.getGuild().getIdLong() + " was registered");
+                    }
+                }
+                break;
+            }
+            case "endregchannelformessages": {
+                if (event.getChannelType() == ChannelType.PRIVATE && ConfigManager.getBool("enable_direct_message_status_messages")) {
+                    if (BotManager.messagePrivateChannels.remove(new UserChannelPair(event.getUser().getIdLong(), event.getChannel().getIdLong()))) {
+                        event.reply("The bot will stop sending messages to this channel").setEphemeral(true).queue();
+                        System.out.println("Private channel with ID " + event.getChannel().getIdLong() + " of user: " + event.getUser().getName() + " with ID " + event.getUser().getIdLong() + " was de-registered");
+                    } else {
+                        event.reply("This channel isn't registered yet, so you can't de-register it").setEphemeral(true).queue();
+                    }
+                }
+                if (event.getChannelType() == ChannelType.TEXT && ConfigManager.getBool("enable_text_channel_status_messages")) {
+                    if (BotManager.messageTextChannels.remove(event.getChannel().getIdLong())) {
+                        event.reply("The bot will stop sending messages to this channel").setEphemeral(true).queue();
+                        System.out.println("Text channel with ID " + event.getChannel().getIdLong() + " of server: " + event.getGuild().getName() + " with ID " + event.getGuild().getIdLong() + " was de-registered");
+                    } else {
+                        event.reply("This channel isn't registered yet, so you can't de-register it").setEphemeral(true).queue();
+                    }
+                }
+                break;
+            }
+            default: {
+                event.reply("Unknown command: " + commandName).setEphemeral(true).queue();
+                break;
+            }
+        }
+    }
+
+    @Override
     public void onReady(@NotNull ReadyEvent event) {
+        BotManager.jda.updateCommands().addCommands(
+                Commands.slash("help", "Sends a list of commands you can use")
+                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)),
+
+                Commands.slash("sendembed", "Sends an embed to the channel you are currently in")
+                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)),
+
+                Commands.slash("regchannelformessages", "Registers the current channel for status messages")
+                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)),
+
+                Commands.slash("endregchannelformessages", "De-registers the current channel for status messages")
+                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
+        ).queue();
+
         for(UserChannelPair id : BotManager.messagePrivateChannels) {
             try {
                 BotManager.jda.openPrivateChannelById(id.user).complete();

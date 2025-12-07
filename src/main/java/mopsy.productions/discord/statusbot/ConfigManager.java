@@ -11,7 +11,7 @@ public class ConfigManager {
     static File configFile;
     public static YamlFile configuration;
 
-    public static void init(StatusbotMain statusbotMain){
+    public static void init(IStatusbotMain statusbotMain){
         configFile = new File(statusbotMain.getConfigPath() + File.separator +"statusbot_config.yml");
         try {
             configuration = new YamlFile(configFile);
@@ -31,7 +31,7 @@ public class ConfigManager {
         configuration.addDefault(key, defaultValue);
         configuration.setComment(key, documentation);
     }
-    private static void createDefaults(StatusbotMain statusbotMain){
+    private static void createDefaults(IStatusbotMain statusbotMain){
         addConfigKey(configuration,"bot_token","enter token here",
                 String.join(
                         "\n",
