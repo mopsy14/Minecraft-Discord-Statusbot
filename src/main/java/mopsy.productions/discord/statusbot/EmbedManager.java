@@ -17,14 +17,14 @@ import java.util.function.Function;
 
 public class EmbedManager {
     public static List<SentEmbedData> sentEmbeds = new ArrayList<>();
-    private static final Map<String, Function<StatusbotMain,String>> varSuppliers = new HashMap<>();
-    private static BiFunction<StatusbotMain,String,String> backupVarSupplier = ((statusbotMain, varName) -> {
-        System.out.println("Statusbot: Unknown variable: "+varName);
+    private static final Map<String, Function<IStatusbotMain,String>> varSuppliers = new HashMap<>();
+    private static BiFunction<IStatusbotMain,String,String> backupVarSupplier = ((statusbotMain, varName) -> {
+        LogUtils.log("Unknown variable: "+varName, true);
         return varName;
     });
     private static String lastEmbedDescription = "";
     private static String lastEmbedTitle = "";
-    public static void sendEmbed(StatusbotMain statusbotMain, MessageChannel messageChannel){
+    public static void sendEmbed(IStatusbotMain statusbotMain, MessageChannel messageChannel){
         String title = parseEmbedText(statusbotMain,ConfigManager.getStr("embed_title"));
         String description = parseEmbedText(statusbotMain,ConfigManager.getStr("embed_content"));
         messageChannel.sendMessageEmbeds(generateEmbed(title, description)).queue(e->{
@@ -40,7 +40,7 @@ public class EmbedManager {
                  .setDescription(description)
                  .build();
     }
-    public static void tryUpdateAllEmbeds(StatusbotMain statusbotMain){
+    public static void tryUpdateAllEmbeds(IStatusbotMain statusbotMain){
         String title = parseEmbedText(statusbotMain,ConfigManager.getStr("embed_title"));
         String description = parseEmbedText(statusbotMain,ConfigManager.getStr("embed_content"));
         if (!title.equals(lastEmbedTitle) || !description.equals(lastEmbedDescription)) {
@@ -58,13 +58,13 @@ public class EmbedManager {
                 if (channel != null)
                     channel.editMessageEmbedsById(embedData.message, embed).queue(null,
                             new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, (exception)->{
-                                System.out.println("Statusbot: Embed message with ID " + embedData.message + " could not be found!");
-                                System.out.println("Statusbot: Removing the embed from update list");
+                                LogUtils.log("Embed message with ID " + embedData.message + " could not be found!", true);
+                                LogUtils.log("Removing the embed from update list", true);
                                 sentEmbeds.remove(embedData);
                             }));
                 else {
-                    System.out.println("Statusbot: Private channel with ID " + embedData.channel + " for embed could not be found!");
-                    System.out.println("Statusbot: Removing the embed from update list");
+                    LogUtils.log("Private channel with ID " + embedData.channel + " for embed could not be found!", true);
+                    LogUtils.log("Removing the embed from update list", true);
                     sentEmbeds.remove(i);
                 }
             } else {
@@ -72,27 +72,27 @@ public class EmbedManager {
                 if (channel != null)
                     channel.editMessageEmbedsById(embedData.message, embed).queue(null,
                             new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, (exception)->{
-                                System.out.println("Statusbot: Embed message with ID " + embedData.message + " could not be found!");
-                                System.out.println("Statusbot: Removing the embed from update list");
+                                LogUtils.log("Embed message with ID " + embedData.message + " could not be found!", true);
+                                LogUtils.log("Removing the embed from update list", true);
                                 sentEmbeds.remove(embedData);
                             }));
                 else {
-                    System.out.println("Statusbot: Text channel with ID " + embedData.channel + " for embed could not be found!");
-                    System.out.println("Statusbot: Removing the embed from update list");
+                    LogUtils.log("Text channel with ID " + embedData.channel + " for embed could not be found!", true);
+                    LogUtils.log("Removing the embed from update list", true);
                     sentEmbeds.remove(i);
                 }
             }
         }
     }
 
-    public static void regVarSupplier(String varName, Function<StatusbotMain,String> varSupplier){
+    public static void regVarSupplier(String varName, Function<IStatusbotMain,String> varSupplier){
         varSuppliers.put(varName,varSupplier);
     }
-    public static void regBackupVarSupplier(BiFunction<StatusbotMain,String,String> supplier){
+    public static void regBackupVarSupplier(BiFunction<IStatusbotMain,String,String> supplier){
         backupVarSupplier=supplier;
     }
 
-    public static String parseEmbedText(StatusbotMain statusbotMain, String inputText){
+    public static String parseEmbedText(IStatusbotMain statusbotMain, String inputText){
         String res= "";
         char[] partVarName = null;
         int partVarNameLength = 0;
@@ -106,7 +106,7 @@ public class EmbedManager {
                     partVarNameLength = 0;
                 }else{
                     String varName = String.valueOf(partVarName).substring(0,partVarNameLength);
-                    Function<StatusbotMain,String> varSupplier = varSuppliers.get(varName);
+                    Function<IStatusbotMain,String> varSupplier = varSuppliers.get(varName);
                     if (varSupplier!=null){
                         res = res.concat(varSupplier.apply(statusbotMain));
                     }else {

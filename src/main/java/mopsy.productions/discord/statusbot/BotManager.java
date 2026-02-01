@@ -3,6 +3,7 @@ package mopsy.productions.discord.statusbot;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -17,11 +18,11 @@ public class BotManager {
     public static JDA jda;
     public static List<Long> messageTextChannels = new ArrayList<>();
     public static List<UserChannelPair> messagePrivateChannels = new ArrayList<>();
-    public static void regBot(String botToken, String status, StatusbotMain main) {
+    public static void regBot(String botToken, String status, IStatusbotMain main) {
         if(botToken==null || botToken.equals("enter token here") || botToken.equals("")){
-            System.out.println("Statusbot: Invalid Bot Token!");
-            System.out.println("Statusbot: Get the token of your discord bot from here: https://discord.com/developers/applications");
-            System.out.println("Statusbot: After that put the token in the config file at: "+ConfigManager.configFile.getAbsoluteFile());
+            LogUtils.log("Invalid Bot Token!", true);
+            LogUtils.log("Get the token of your discord bot from here: https://discord.com/developers/applications", true);
+            LogUtils.log("After that put the token in the config file at: "+ConfigManager.configFile.getAbsoluteFile(), true);
             return;
         }
         if(jda == null){
@@ -50,14 +51,18 @@ public class BotManager {
                         break;
                     default:
                         builder.setActivity(Activity.of(Activity.ActivityType.PLAYING, status));
-                        System.out.println("Statusbot: invalid discord bot status mode: " + configuration.getString("status_mode"));
-                        System.out.println("Statusbot: valid statuses are: playing, competing, listening, watching (Streaming is currently disabled)");
+                        LogUtils.log("invalid discord bot status mode: " + configuration.getString("status_mode"), true);
+                        LogUtils.log("valid statuses are: playing, competing, listening, watching (Streaming is currently disabled)", true);
                         break;
                 }
             }else{
                 builder.setActivity(null);
             }
-            jda = builder.build();
+            try {
+                jda = builder.build();
+            } catch (InvalidTokenException e) {
+                LogUtils.log("The provided token '" + botToken + "' is invalid!", true);
+            }
 
         }else{
             switch (configuration.getString("status_mode").toLowerCase()) {
@@ -78,8 +83,8 @@ public class BotManager {
                     break;
                 default:
                     jda.getPresence().setActivity(Activity.of(Activity.ActivityType.PLAYING, status));
-                    System.out.println("Statusbot: invalid discord bot status mode: " + configuration.getString("status_mode"));
-                    System.out.println("Statusbot: valid statuses are: playing, competing, listening, watching (Streaming is currently disabled)");
+                    LogUtils.log("invalid discord bot status mode: " + configuration.getString("status_mode"), true);
+                    LogUtils.log("valid statuses are: playing, competing, listening, watching (Streaming is currently disabled)", true);
                     break;
             }
         }
