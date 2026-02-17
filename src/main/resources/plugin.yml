@@ -1,5 +1,5 @@
 name: Statusbot
 version: '${version}'
-main: mopsy.productions.discord.statusbot.StatusbotMain
+main: mopsy.productions.discord.statusbot.StatusbotMainSpigot
 folia-supported: true
 softdepend: ["PlaceholderAPI"]
