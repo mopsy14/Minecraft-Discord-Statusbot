@@ -1,22 +1,20 @@
 package mopsy.productions.discord.statusbot;
 
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import okhttp3.OkHttpClient;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.simpleyaml.configuration.file.YamlFile;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 public class StatusbotMainSpigot extends JavaPlugin implements Listener, IStatusbotMain {
     private boolean online = true;
@@ -71,67 +69,23 @@ public class StatusbotMainSpigot extends JavaPlugin implements Listener, IStatus
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
-        BotManager.regBot(
-                ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray()),getServer().getOnlinePlayers().size()),
-                this
+        String status = Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray()),getServer().getOnlinePlayers().size());
+        String message = Parser.createJoinMessage(
+                ()->MakeStringList(getServer().getOnlinePlayers().toArray()),
+                e.getPlayer().getName(),
+                getServer().getOnlinePlayers().size()
         );
-        if(BotManager.jda!=null) {
-            if (ConfigManager.getBool("enable_server_join_messages")) {
-                String startMessage = Parser.createJoinMessage(
-                        ()->MakeStringList(getServer().getOnlinePlayers().toArray()),
-                        e.getPlayer().getName(),
-                        getServer().getOnlinePlayers().size()
-                );
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
-                    for (long id : BotManager.messageTextChannels) {
-                        TextChannel channel = BotManager.jda.getTextChannelById(id);
-                        if (channel != null)
-                            channel.sendMessage(startMessage).queue();
-
-                    }
-                }
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
-                    for (UserChannelPair id : BotManager.messagePrivateChannels) {
-                        PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
-                        if (channel != null)
-                            channel.sendMessage(startMessage).queue();
-                    }
-                }
-            }
-        }
+        IStatusbotMain.super.onPlayerJoined(status, message);
     }
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e){
-        BotManager.regBot(
-                ConfigManager.configuration.getString("bot_token"),
-                Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray(),e.getPlayer().getName()),getServer().getOnlinePlayers().size()-1),
-                this
+        String status = Parser.createStatusMessage(()->MakeStringList(getServer().getOnlinePlayers().toArray(),e.getPlayer().getName()),getServer().getOnlinePlayers().size()-1);
+        String message = Parser.createLeaveMessage(
+                ()->MakeStringList(getServer().getOnlinePlayers().toArray(),e.getPlayer().getName()),
+                e.getPlayer().getName(),
+                getServer().getOnlinePlayers().size()-1
         );
-        if(BotManager.jda!=null) {
-            if (ConfigManager.getBool("enable_server_leave_messages")) {
-                String startMessage = Parser.createLeaveMessage(
-                        ()->MakeStringList(getServer().getOnlinePlayers().toArray(),e.getPlayer().getName()),
-                        e.getPlayer().getName(),
-                        getServer().getOnlinePlayers().size()-1
-                );
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
-                    for (long id : BotManager.messageTextChannels) {
-                        TextChannel channel = BotManager.jda.getTextChannelById(id);
-                        if (channel != null)
-                            channel.sendMessage(startMessage).queue();
-
-                    }
-                }
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
-                    for (UserChannelPair id : BotManager.messagePrivateChannels) {
-                        PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
-                        if (channel != null)
-                            channel.sendMessage(startMessage).queue();
-                    }
-                }
-            }
-        }
+        IStatusbotMain.super.onPlayerLeft(status, message);
     }
 
     private List<String> MakeStringList(Object[] players){
@@ -156,89 +110,40 @@ public class StatusbotMainSpigot extends JavaPlugin implements Listener, IStatus
     @Override
     public void onDisable() {
         online=false;
-        if(BotManager.jda!=null){
-            if (ConfigManager.getBool("enable_server_stop_messages")) {
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
-                    String stopMessage = Parser.createStopMessage();
-                    for (long id : BotManager.messageTextChannels) {
-                        TextChannel channel = BotManager.jda.getTextChannelById(id);
-                        if (channel != null)
-                            channel.sendMessage(stopMessage).queue();
-
-                    }
-                }
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
-                    String stopMessage = Parser.createStopMessage();
-                    for (UserChannelPair id : BotManager.messagePrivateChannels) {
-                        PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
-                        if (channel != null)
-                            channel.sendMessage(stopMessage).queue();
-                    }
-                }
-            }
-            EmbedManager.tryUpdateAllEmbeds(this);
-        }
-        DataManager.saveAllData(this);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        if(BotManager.jda!=null){
-            BotManager.jda.shutdown();
-
-            try {
-                if(!BotManager.jda.awaitShutdown(Duration.ofSeconds(10))){
-                    BotManager.jda.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            OkHttpClient client = BotManager.jda.getHttpClient();
-            client.connectionPool().evictAll();
-            client.dispatcher().executorService().shutdownNow();
-        }
+        IStatusbotMain.super.onBotShutdown();
     }
+
     public void onBotReady(){
-        if(BotManager.jda!=null) {
-            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
+        if (BotManager.jda != null) {
+            IStatusbotMain.super.onBotReady();
+            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                 EmbedManager.regBackupVarSupplier(((statusbotMain, input) -> {
                     if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
-                        return PlaceholderAPI.setPlaceholders(null,input);
+                        return PlaceholderAPI.setPlaceholders(null, input);
                     else
                         return "N/A";
                 }));
-            if (ConfigManager.getBool("enable_server_start_messages")) {
-                String startMessage = Parser.createStartMessage();
-                if (ConfigManager.getBool("enable_text_channel_status_messages")) {
-                    for (long id : BotManager.messageTextChannels) {
-                        TextChannel channel = BotManager.jda.getTextChannelById(id);
-                        if (channel != null)
-                            channel.sendMessage(startMessage).queue();
-
-                    }
-                }
-                if (ConfigManager.getBool("enable_direct_message_status_messages")) {
-                    for (UserChannelPair id : BotManager.messagePrivateChannels) {
-                        PrivateChannel channel = BotManager.jda.getPrivateChannelById(id.channel);
-                        if (channel != null)
-                            channel.sendMessage(startMessage).queue();
-                    }
-                }
             }
-            new BukkitRunnable(){
+
+            new BukkitRunnable() {
                 @Override
                 public void run() {
                     EmbedManager.tryUpdateAllEmbeds(StatusbotMainSpigot.this);
                 }
-            }.runTaskTimer(this,0,200);
+            }.runTaskTimer(this, 0, 200);
         }
     }
+
     public void regDefaultEmbedVarProviders(){
         EmbedManager.regVarSupplier("server-status",(statusbotMain) -> ((StatusbotMainSpigot)statusbotMain).online?":green_circle:":":red_circle:");
         EmbedManager.regVarSupplier("amount-of-players",(statusbotMain -> ((StatusbotMainSpigot)statusbotMain).online?String.valueOf(getServer().getOnlinePlayers().size()):"0"));
         EmbedManager.regVarSupplier("player-list",(statusbotMain -> ((StatusbotMainSpigot)statusbotMain).online?String.join(ConfigManager.getStr("embed_player_separator_text"),MakeStringList(getServer().getOnlinePlayers().toArray())):""));
         EmbedManager.regVarSupplier("max-players",(statusbotMain -> String.valueOf(getServer().getMaxPlayers())));
         EmbedManager.regVarSupplier("motd",(statusbotMain -> getServer().getMotd()));
+    }
+
+    @Override
+    public void log(String string, boolean error) {
+        PluginLogger.getLogger("Statusbot").log(error ? Level.SEVERE : Level.INFO, string);
     }
 }
