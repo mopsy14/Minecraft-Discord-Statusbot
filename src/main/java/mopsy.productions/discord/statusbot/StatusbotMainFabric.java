@@ -55,8 +55,8 @@ public class StatusbotMainFabric implements IStatusbotMain, ModInitializer {
     @Override
     public void regDefaultEmbedVarProviders(){
         EmbedManager.regVarSupplier("server-status",(statusbotMain) -> ((StatusbotMainFabric)statusbotMain).online?":green_circle:":":red_circle:");
-        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain -> String.valueOf(((StatusbotMainFabric)statusbotMain).server.getCurrentPlayerCount())));
-        EmbedManager.regVarSupplier("player-list",(statusbotMain -> String.join(ConfigManager.getStr("embed_player_separator_text"),MakeStringList(((StatusbotMainFabric)statusbotMain).server.getPlayerNames()))));
+        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain -> ((StatusbotMainFabric)statusbotMain).online?String.valueOf(((StatusbotMainFabric)statusbotMain).server.getCurrentPlayerCount()):"0"));
+        EmbedManager.regVarSupplier("player-list",(statusbotMain -> ((StatusbotMainFabric)statusbotMain).online?String.join(ConfigManager.getStr("embed_player_separator_text"),MakeStringList(((StatusbotMainFabric)statusbotMain).server.getPlayerNames())):""));
         EmbedManager.regVarSupplier("max-players",(statusbotMain -> String.valueOf(((StatusbotMainFabric)statusbotMain).server.getMaxPlayerCount())));
         EmbedManager.regVarSupplier("motd",(statusbotMain -> String.valueOf(((StatusbotMainFabric)statusbotMain).server.getServerMotd())));
     }
@@ -75,6 +75,7 @@ public class StatusbotMainFabric implements IStatusbotMain, ModInitializer {
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            online = false;
             IStatusbotMain.super.onBotShutdown();
         });
 
