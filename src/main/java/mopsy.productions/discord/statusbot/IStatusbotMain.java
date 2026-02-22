@@ -8,14 +8,13 @@ import org.simpleyaml.configuration.file.YamlFile;
 import java.time.Duration;
 
 public interface IStatusbotMain {
-    public default void init(){initAll();}
-    default void initAll(){
+    default void initAll() {
         LogUtils.init(this);
         ConfigManager.init(this);
         DataManager.getAllData(this);
         regDefaultEmbedVarProviders();
     }
-    default void addConfigDefaults(YamlFile configuration){
+    default void addConfigDefaults(YamlFile configuration) {
         ConfigManager.addConfigKey(configuration,"embed_title","Minecraft Server Status",String.join(
                 "\n",
                 "",
@@ -30,10 +29,8 @@ public interface IStatusbotMain {
                         "playername1---playername2---playername3---playername4"));
     }
 
-    public default void sendMessage(String message)
-    {
-        if(BotManager.jda == null)
-        {
+    default void sendMessage(String message) {
+        if (BotManager.jda == null) {
             System.out.println("JDA uninitialized, skipping message");
             return;
         }
@@ -55,9 +52,8 @@ public interface IStatusbotMain {
         }
     }
 
-    public default void onBotShutdown()
-    {
-        if(BotManager.jda!=null){
+    default void onBotShutdown() {
+        if (BotManager.jda!=null) {
             if (ConfigManager.getBool("enable_server_stop_messages")){
                 String stopMessage = Parser.createStopMessage();
                 sendMessage(stopMessage);
@@ -71,7 +67,7 @@ public interface IStatusbotMain {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        if(BotManager.jda!=null) {
+        if (BotManager.jda!=null) {
             BotManager.jda.shutdown();
 
             try {
@@ -88,10 +84,8 @@ public interface IStatusbotMain {
         }
     }
 
-    public default void onBotReady()
-    {
-        if(BotManager.jda != null)
-        {
+    default void onBotReady() {
+        if (BotManager.jda != null) {
             if (ConfigManager.getBool("enable_server_start_messages")) {
                 String startMessage = Parser.createStartMessage();
                 sendMessage(startMessage);
@@ -99,22 +93,20 @@ public interface IStatusbotMain {
         }
     }
 
-    public default void onPlayerJoined(String status, String joinMessage)
-    {
+    default void onPlayerJoined(String status, String joinMessage) {
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
                 status,
                 this
         );
-        if(BotManager.jda!=null) {
+        if (BotManager.jda!=null) {
             if (ConfigManager.getBool("enable_server_join_messages")) {
                 sendMessage(joinMessage);
             }
         }
     }
 
-    public default void onPlayerLeft(String status, String leftMessage)
-    {
+    default void onPlayerLeft(String status, String leftMessage) {
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
                 status,
@@ -128,11 +120,17 @@ public interface IStatusbotMain {
         }
     }
 
+    default void updateEmbeds() {
+        if (BotManager.jda != null) {
+            EmbedManager.tryUpdateAllEmbeds(this);
+        }
+    }
+
     String getConfigPath();
 
-    public void regDefaultEmbedVarProviders();
+    void regDefaultEmbedVarProviders();
 
-    public default void log(String string, boolean error) {
+    default void log(String string, boolean error) {
         if (error)
             System.err.println("Statusbot: " + string);
         else

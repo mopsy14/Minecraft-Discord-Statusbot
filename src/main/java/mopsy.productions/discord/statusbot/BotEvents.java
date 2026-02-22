@@ -5,10 +5,12 @@ import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.requests.CloseCode;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
@@ -205,5 +207,14 @@ public class BotEvents extends ListenerAdapter {
             }
         }
         main.onBotReady();
+    }
+
+    @Override
+    public void onShutdown(ShutdownEvent event) {
+        if (event.getCloseCode() == CloseCode.DISALLOWED_INTENTS) {
+            LogUtils.log("The gateway intents of your bot are not enabled!", true);
+            LogUtils.log("Go to the discord developer portal and select your bot", true);
+            LogUtils.log("Go to the bot tab and enable the server members intent and the message content intent", true);
+        }
     }
 }
