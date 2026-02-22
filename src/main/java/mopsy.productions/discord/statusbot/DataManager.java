@@ -12,18 +12,18 @@ public class DataManager {
                 getAllData(dataFileFolder);
                 return;
             } else if (dataFileFolder.mkdirs()) {
-                System.out.println("Statusbot: Successfully created the Statusbot_Data folder");
+                LogUtils.log("Successfully created the Statusbot_Data folder");
                 getAllData(dataFileFolder);
                 return;
             }
         } else {
             if (dataFileFolder.mkdirs()) {
-                System.out.println("Statusbot: Successfully created the Statusbot_Data folder");
+                LogUtils.log("Successfully created the Statusbot_Data folder");
                 getAllData(dataFileFolder);
                 return;
             }
         }
-        System.out.println("Statusbot: Something went wrong while creating the Statusbot_Data folder at: " + dataFileFolder.getAbsoluteFile());
+        LogUtils.log("Something went wrong while creating the Statusbot_Data folder at: " + dataFileFolder.getAbsoluteFile(), true);
     }
 
     private static void getAllData(File dataFileFolder) {
@@ -36,7 +36,7 @@ public class DataManager {
             BotManager.messageTextChannels = readLongsDataFile(messageTextChannelsFile);
             BotManager.messagePrivateChannels = readDoubleLongsDataFile(messagePrivateChannelsFile);
             EmbedManager.sentEmbeds = readEmbedDataFiles(embedMessagesFile,privateEmbedsFile);
-            System.out.println("Statusbot: Read all registered channels from data files");
+            LogUtils.log("Read all registered channels from data files");
         }
     }
 
@@ -44,33 +44,33 @@ public class DataManager {
         try {
             if (!messageTextChannelsFile.exists()) {
                 if (messageTextChannelsFile.createNewFile()) {
-                    System.out.println("Statusbot: Successfully created the message_text_channels.txt file");
+                    LogUtils.log("Successfully created the message_text_channels.txt file");
                 } else {
-                    System.out.println("Statusbot: Something went wrong while creating the message_text_channels.txt file at: " + messageTextChannelsFile.getAbsoluteFile());
+                    LogUtils.log("Something went wrong while creating the message_text_channels.txt file at: " + messageTextChannelsFile.getAbsoluteFile(), true);
                     return false;
                 }
             }
             if (!messagePrivateChannelsFile.exists()) {
                 if (messagePrivateChannelsFile.createNewFile()) {
-                    System.out.println("Statusbot: Successfully created the message_private_channels.txt file");
+                    LogUtils.log("Successfully created the message_private_channels.txt file");
                 } else {
-                    System.out.println("Statusbot: Something went wrong while creating the message_private_channels.txt file at: " + messagePrivateChannelsFile.getAbsoluteFile());
+                    LogUtils.log("Something went wrong while creating the message_private_channels.txt file at: " + messagePrivateChannelsFile.getAbsoluteFile(), true);
                     return false;
                 }
             }
             if (!embedMessagesFile.exists()) {
                 if (embedMessagesFile.createNewFile()) {
-                    System.out.println("Statusbot: Successfully created the embed_messages.txt file");
+                    LogUtils.log("Successfully created the embed_messages.txt file");
                 } else {
-                    System.out.println("Statusbot: Something went wrong while creating the embed_messages.txt file at: " + embedMessagesFile.getAbsoluteFile());
+                    LogUtils.log("Something went wrong while creating the embed_messages.txt file at: " + embedMessagesFile.getAbsoluteFile());
                     return false;
                 }
             }
             if (!privateEmbedsFile.exists()) {
                 if (privateEmbedsFile.createNewFile()) {
-                    System.out.println("Statusbot: Successfully created the private_embed_messages.txt file");
+                    LogUtils.log("Successfully created the private_embed_messages.txt file");
                 } else {
-                    System.out.println("Statusbot: Something went wrong while creating the private_embed_messages.txt file at: " + privateEmbedsFile.getAbsoluteFile());
+                    LogUtils.log("Something went wrong while creating the private_embed_messages.txt file at: " + privateEmbedsFile.getAbsoluteFile(), true);
                     return false;
                 }
             }
@@ -90,8 +90,8 @@ public class DataManager {
                         try {
                             res.add(Long.parseLong(readChars));
                         } catch (NumberFormatException numberFormatException) {
-                            System.out.println("Statusbot: Something went wrong while trying to read a number from " + file.getAbsoluteFile());
-                            System.out.println("Statusbot: " + readChars + " isn't a valid long");
+                            LogUtils.log("Something went wrong while trying to read a number from " + file.getAbsoluteFile(), true);
+                            LogUtils.log("" + readChars + " isn't a valid long", true);
                             numberFormatException.printStackTrace();
                         }
                     } else
@@ -115,8 +115,8 @@ public class DataManager {
                         try {
                             res.add(new UserChannelPair(Long.parseLong(readChars1), Long.parseLong(readChars2)));
                         } catch (NumberFormatException numberFormatException) {
-                            System.out.println("Statusbot: Something went wrong while trying to read a number from " + file.getAbsoluteFile());
-                            System.out.println("Statusbot: " + readChars1 + " or " + readChars2 + " isn't a valid long");
+                            LogUtils.log("Something went wrong while trying to read a number from " + file.getAbsoluteFile(), true);
+                            LogUtils.log(readChars1 + " or " + readChars2 + " isn't a valid long", true);
                             numberFormatException.printStackTrace();
                         }
                     } else
@@ -140,8 +140,8 @@ public class DataManager {
                         try {
                             res.add(new SentEmbedData(Long.parseLong(channel), Long.parseLong(message)));
                         } catch (NumberFormatException numberFormatException) {
-                            System.out.println("Statusbot: Something went wrong while trying to read a number from " + embeds_file.getAbsoluteFile());
-                            System.out.println("Statusbot: " + channel + " or " + message + " isn't a valid long");
+                            LogUtils.log("Something went wrong while trying to read a number from " + embeds_file.getAbsoluteFile(), true);
+                            LogUtils.log("" + channel + " or " + message + " isn't a valid long", true);
                             numberFormatException.printStackTrace();
                         }
                     } else
@@ -157,8 +157,8 @@ public class DataManager {
                         try {
                             res.add(new SentEmbedData(Long.parseLong(channel), Long.parseLong(message), Long.parseLong(user)));
                         } catch (NumberFormatException numberFormatException) {
-                            System.out.println("Statusbot: Something went wrong while trying to read a number from " + private_embeds_file.getAbsoluteFile());
-                            System.out.println("Statusbot: " + channel + ", " + message + "or"+ user + " isn't a valid long");
+                            LogUtils.log("Something went wrong while trying to read a number from " + private_embeds_file.getAbsoluteFile(), true);
+                            LogUtils.log("" + channel + ", " + message + "or"+ user + " isn't a valid long", true);
                             numberFormatException.printStackTrace();
                         }
                     } else
@@ -187,7 +187,7 @@ public class DataManager {
                 return;
             }
         }
-        System.out.println("Statusbot: Something went wrong while creating the Statusbot_Data folder at: " + dataFileFolder.getAbsoluteFile());
+        LogUtils.log("Something went wrong while creating the Statusbot_Data folder at: " + dataFileFolder.getAbsoluteFile(), true);
     }
 
     private static void saveAllData(File dataFileFolder) {
@@ -213,7 +213,7 @@ public class DataManager {
                     }
                 }
             }
-            System.out.println("Statusbot: Successfully wrote registered channels to a data file");
+            LogUtils.log("Successfully wrote registered channels to a data file");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -230,7 +230,7 @@ public class DataManager {
                     }
                 }
             }
-            System.out.println("Statusbot: Successfully wrote registered channels to a data file");
+            LogUtils.log("Successfully wrote registered channels to a data file");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -252,7 +252,7 @@ public class DataManager {
                 }
 
             }
-            System.out.println("Statusbot: Successfully wrote sent embeds to a data file");
+            LogUtils.log("Successfully wrote sent embeds to a data file");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

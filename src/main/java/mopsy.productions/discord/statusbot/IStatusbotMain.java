@@ -10,6 +10,7 @@ import java.time.Duration;
 public interface IStatusbotMain {
     public default void init(){initAll();}
     default void initAll(){
+        LogUtils.init(this);
         ConfigManager.init(this);
         DataManager.getAllData(this);
         regDefaultEmbedVarProviders();
@@ -130,4 +131,11 @@ public interface IStatusbotMain {
     String getConfigPath();
 
     public void regDefaultEmbedVarProviders();
+
+    public default void log(String string, boolean error) {
+        if (error)
+            System.err.println("Statusbot: " + string);
+        else
+            System.out.println("Statusbot: " + string);
+    }
 }

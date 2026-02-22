@@ -23,7 +23,7 @@ public class ConfigManager {
 
             initialized = true;
         }catch (IOException ioException){
-            System.out.println("Statusbot: Something went wrong while creating the config file!");
+            LogUtils.log("Something went wrong while creating the config file!", true);
             ioException.printStackTrace();
         }
     }
