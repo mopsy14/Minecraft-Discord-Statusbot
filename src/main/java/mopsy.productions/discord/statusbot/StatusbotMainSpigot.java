@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.simpleyaml.configuration.file.YamlFile;
@@ -15,9 +14,11 @@ import org.simpleyaml.configuration.file.YamlFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class StatusbotMainSpigot extends JavaPlugin implements Listener, IStatusbotMain {
     private boolean online = true;
+    private Logger logger = null;
 
     @Override
     public void addConfigDefaults(YamlFile configuration){
@@ -57,6 +58,7 @@ public class StatusbotMainSpigot extends JavaPlugin implements Listener, IStatus
 
     @Override
     public void onEnable() {
+        logger = getLogger();
         initAll();
         getServer().getPluginManager().registerEvents(this,this);
 
@@ -128,7 +130,7 @@ public class StatusbotMainSpigot extends JavaPlugin implements Listener, IStatus
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    EmbedManager.tryUpdateAllEmbeds(StatusbotMainSpigot.this);
+                    StatusbotMainSpigot.this.updateEmbeds();
                 }
             }.runTaskTimer(this, 0, 200);
         }
@@ -144,6 +146,6 @@ public class StatusbotMainSpigot extends JavaPlugin implements Listener, IStatus
 
     @Override
     public void log(String string, boolean error) {
-        PluginLogger.getLogger("Statusbot").log(error ? Level.SEVERE : Level.INFO, string);
+        logger.log(error ? Level.SEVERE : Level.INFO, string);
     }
 }
