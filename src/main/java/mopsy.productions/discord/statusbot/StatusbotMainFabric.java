@@ -6,6 +6,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
 import org.simpleyaml.configuration.file.YamlFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import java.util.List;
 public class StatusbotMainFabric implements IStatusbotMain, ModInitializer {
     private boolean online = true;
     private MinecraftServer server = null;
+    private final Logger LOGGER = LoggerFactory.getLogger("statusbot");
 
     @Override
     public void addConfigDefaults(YamlFile configuration){
@@ -101,7 +104,7 @@ public class StatusbotMainFabric implements IStatusbotMain, ModInitializer {
 
         ServerTickEvents.END_SERVER_TICK.register((server)->{
             if (server.getTicks() % 200 == 0)
-                EmbedManager.tryUpdateAllEmbeds(StatusbotMainFabric.this);
+                IStatusbotMain.super.updateEmbeds();
         });
     }
 
@@ -123,5 +126,13 @@ public class StatusbotMainFabric implements IStatusbotMain, ModInitializer {
         res.addAll(Arrays.asList(players));
         res.add(extra);
         return res;
+    }
+
+    @Override
+    public void log(String string, boolean error) {
+        if (error)
+            LOGGER.error(string);
+        else
+            LOGGER.info(string);
     }
 }
