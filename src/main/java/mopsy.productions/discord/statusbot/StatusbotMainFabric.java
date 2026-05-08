@@ -58,10 +58,10 @@ public class StatusbotMainFabric implements IStatusbotMain, ModInitializer {
     @Override
     public void regDefaultEmbedVarProviders(){
         EmbedManager.regVarSupplier("server-status",(statusbotMain) -> ((StatusbotMainFabric)statusbotMain).online?":green_circle:":":red_circle:");
-        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain -> ((StatusbotMainFabric)statusbotMain).online?String.valueOf(((StatusbotMainFabric)statusbotMain).server.getCurrentPlayerCount()):"0"));
+        EmbedManager.regVarSupplier("amount-of-players",(statusbotMain -> ((StatusbotMainFabric)statusbotMain).online?String.valueOf(((StatusbotMainFabric)statusbotMain).server.getPlayerCount()):"0"));
         EmbedManager.regVarSupplier("player-list",(statusbotMain -> ((StatusbotMainFabric)statusbotMain).online?String.join(ConfigManager.getStr("embed_player_separator_text"),MakeStringList(((StatusbotMainFabric)statusbotMain).server.getPlayerNames())):""));
-        EmbedManager.regVarSupplier("max-players",(statusbotMain -> String.valueOf(((StatusbotMainFabric)statusbotMain).server.getMaxPlayerCount())));
-        EmbedManager.regVarSupplier("motd",(statusbotMain -> String.valueOf(((StatusbotMainFabric)statusbotMain).server.getServerMotd())));
+        EmbedManager.regVarSupplier("max-players",(statusbotMain -> String.valueOf(((StatusbotMainFabric)statusbotMain).server.getMaxPlayers())));
+        EmbedManager.regVarSupplier("motd",(statusbotMain -> String.valueOf(((StatusbotMainFabric)statusbotMain).server.getMotd())));
     }
 
     @Override
@@ -83,27 +83,27 @@ public class StatusbotMainFabric implements IStatusbotMain, ModInitializer {
         });
 
         ServerPlayConnectionEvents.JOIN.register((serverPlayNetworkHandler,packetSender,server)->{
-            String status = Parser.createStatusMessage(()->MakeStringListWith(server.getPlayerNames(),serverPlayNetworkHandler.getPlayer().getEntityName()),server.getPlayerNames().length+1);
+            String status = Parser.createStatusMessage(()->MakeStringListWith(server.getPlayerNames(),serverPlayNetworkHandler.getPlayer().getScoreboardName()),server.getPlayerNames().length+1);
             String joinMessage = Parser.createJoinMessage(
-                    ()->MakeStringListWith(server.getPlayerNames(),serverPlayNetworkHandler.getPlayer().getEntityName()),
-                    serverPlayNetworkHandler.getPlayer().getEntityName(),
+                    ()->MakeStringListWith(server.getPlayerNames(),serverPlayNetworkHandler.getPlayer().getScoreboardName()),
+                    serverPlayNetworkHandler.getPlayer().getScoreboardName(),
                     server.getPlayerNames().length+1
             );
             IStatusbotMain.super.onPlayerJoined(status, joinMessage);
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((serverPlayNetworkHandler,server)->{
-            String status = Parser.createStatusMessage(()->MakeStringList(server.getPlayerNames(),serverPlayNetworkHandler.getPlayer().getEntityName()),server.getPlayerNames().length-1);
+            String status = Parser.createStatusMessage(()->MakeStringList(server.getPlayerNames(),serverPlayNetworkHandler.getPlayer().getScoreboardName()),server.getPlayerNames().length-1);
             String leaveMessage = Parser.createLeaveMessage(
-                    ()->MakeStringList(server.getPlayerNames(),serverPlayNetworkHandler.getPlayer().getEntityName()),
-                    serverPlayNetworkHandler.getPlayer().getEntityName(),
+                    ()->MakeStringList(server.getPlayerNames(),serverPlayNetworkHandler.getPlayer().getScoreboardName()),
+                    serverPlayNetworkHandler.getPlayer().getScoreboardName(),
                     server.getPlayerNames().length-1
             );
             IStatusbotMain.super.onPlayerLeft(status, leaveMessage);
         });
 
         ServerTickEvents.END_SERVER_TICK.register((server)->{
-            if (server.getTicks() % 200 == 0)
+            if (server.getTickCount() % 200 == 0)
                 IStatusbotMain.super.updateEmbeds();
         });
     }
