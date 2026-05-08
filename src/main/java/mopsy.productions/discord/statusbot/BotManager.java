@@ -29,7 +29,7 @@ public class BotManager {
             builder = JDABuilder.
                     createDefault(botToken, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
-                    .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS)
+                    .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS, CacheFlag.SOUNDBOARD_SOUNDS)
                     .addEventListeners(new BotEvents(main));
             if (!(status == null || status.equals(""))) {
                 switch (configuration.getString("status_mode").toLowerCase()) {
