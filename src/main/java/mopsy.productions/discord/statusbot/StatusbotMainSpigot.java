@@ -2,17 +2,22 @@ package mopsy.productions.discord.statusbot;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.simpleyaml.configuration.file.YamlFile;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,13 +131,38 @@ public class StatusbotMainSpigot extends JavaPlugin implements Listener, IStatus
                         return "N/A";
                 }));
             }
+            try {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        StatusbotMainSpigot.this.updateEmbeds();
+                    }
+                }.runTaskTimer(this, 0, 200);
+            } catch (UnsupportedOperationException e) {
+                System.out.println("Got an UnsupportedOperationException, trying fallback for Folia");
 
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    StatusbotMainSpigot.this.updateEmbeds();
+                try {
+                    Method getAsyncSchedulerMethod = Server.class.getMethod("getGlobalRegionScheduler");
+                    Object scheduler = getAsyncSchedulerMethod.invoke(Bukkit.getServer());
+                    Class<?> schedulerClass = StatusbotMainSpigot.this.getClassLoader().loadClass("io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler");
+                    Method scheduleMethod =  schedulerClass.getMethod("runAtFixedRate", Plugin.class, Consumer.class, long.class, long.class);
+                    scheduleMethod.invoke(scheduler, this, (Consumer<Object>) o -> StatusbotMainSpigot.this.updateEmbeds(), 1L, 200L);
+
+                    System.out.println("Fallback succeeded");
+                } catch (NoSuchMethodException ex) {
+                    System.err.println("fallback failed, couldn't get method");
+                    ex.printStackTrace();
+                } catch (InvocationTargetException ex) {
+                    System.err.println("fallback failed, couldn't call method");
+                    ex.printStackTrace();
+                } catch (IllegalAccessException ex) {
+                    System.err.println("fallback failed, IllegalAccessException");
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException ex) {
+                    System.err.println("fallback failed, couldn't load class");
+                    ex.printStackTrace();
                 }
-            }.runTaskTimer(this, 0, 200);
+            }
         }
     }
 
