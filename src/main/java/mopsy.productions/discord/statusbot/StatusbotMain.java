@@ -3,7 +3,7 @@ package mopsy.productions.discord.statusbot;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
+import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -128,7 +128,7 @@ public class StatusbotMain {
         return res;
     }
     @Subscribe
-    public void onConnected(ServerPostConnectEvent event){
+    public void onConnected(PostLoginEvent event){
         BotManager.regBot(
                 ConfigManager.configuration.getString("bot_token"),
                 Parser.createStatusMessage(()->MakeStringList(server.getAllPlayers()),server.getAllPlayers().size()),
