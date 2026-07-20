@@ -1,10 +1,10 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '9.4.1'
     id 'java'
 }
 
 group = 'mopsy.productions'
-version = '23.1'
+version = '24.0'
 
 repositories {
     mavenCentral()
@@ -27,7 +27,7 @@ repositories {
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.12-R0.1-SNAPSHOT"
     implementation 'com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4'
-    implementation("net.dv8tion:JDA:5.3.2") {
+    implementation("net.dv8tion:JDA:6.4.1") {
         exclude module: 'opus-java'
     }
     compileOnly 'me.clip:placeholderapi:2.11.6'
